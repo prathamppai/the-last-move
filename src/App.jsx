@@ -288,6 +288,68 @@ const InternalStyles = () => (
       100% { transform: translate(0, 0) rotate(360deg); }
     }
 
+    /* Hooded Figure - Central mysterious presence */
+    .hooded-figure {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(200px, 28vw, 380px);
+      height: clamp(260px, 37vw, 500px);
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0.6;
+      filter: drop-shadow(0 20px 60px rgba(0,0,0,0.5));
+      animation: figure-breathe 8s ease-in-out infinite, figure-drift 25s ease-in-out infinite;
+      will-change: transform, opacity, filter;
+    }
+
+    @keyframes figure-breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.5)); }
+      50% { transform: translate(-50%, -50%) scale(1.015); opacity: 0.65; filter: drop-shadow(0 25px 70px rgba(184,42,42,0.12)); }
+    }
+
+    @keyframes figure-drift {
+      0%, 100% { transform: translate(-50%, -50%) rotate(0deg) translateX(0) translateY(0); }
+      20% { transform: translate(-50%, -50%) rotate(0.3deg) translateX(-8px) translateY(-5px); }
+      40% { transform: translate(-50%, -50%) rotate(-0.2deg) translateX(5px) translateY(-10px); }
+      60% { transform: translate(-50%, -50%) rotate(0.15deg) translateX(-5px) translateY(3px); }
+      80% { transform: translate(-50%, -50%) rotate(-0.25deg) translateX(8px) translateY(-8px); }
+    }
+
+    /* Figure emerges on scroll reveal */
+    .hero-section__bg .hooded-figure {
+      opacity: 0;
+      transform: translate(-50%, -40%) scale(0.95);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-section.in .hero-section__bg .hooded-figure {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hooded-figure {
+        animation: none !important;
+        opacity: 0.5 !important;
+        transform: translate(-50%, -50%) !important;
+        filter: drop-shadow(0 20px 60px rgba(0,0,0,0.4)) !important;
+      }
+      .hero-section__bg .hooded-figure {
+        opacity: 0.5 !important;
+        transform: translate(-50%, -50%) !important;
+        transition: none !important;
+      }
+    }
+    @media (max-width: 900px) {
+      .hooded-figure { opacity: 0.5; }
+    }
+    @media (max-width: 600px) {
+      .hooded-figure { opacity: 0.4; width: clamp(160px, 35vw, 280px); }
+    }
+
     /* Story section - building tension */
     .story-section__bg {
       position: absolute;
@@ -827,12 +889,7 @@ const InternalStyles = () => (
 // HOOK: useCinematicReveal
 // Bi-directional: 'in' when entering, 'out' when exited above viewport.
 // ============================================
-function useCinematicReveal(opts = {}) {
-  const {
-    enterMargin = '-8%',   // how far into viewport before triggering in
-    exitTopMargin = '0px', // top margin — when above this, trigger out
-  } = opts
-
+function useCinematicReveal() {
   const refs = useRef(new Map())
   const stateMap = useRef({})         // 'hidden' | 'in' | 'out'
   const [, forceUpdate] = useState(0)
@@ -894,7 +951,208 @@ function useCinematicReveal(opts = {}) {
     return extra ? `${cls} ${extra}` : cls
   }, [])
 
-  return { setRef, getClass, stateMap: stateMap.current }
+  return { setRef, getClass }
+}
+
+// ============================================
+// COMPONENT: HoodedFigure
+// Central mysterious figure - Dev in the black hoodie
+// ============================================
+function HoodedFigure() {
+  return (
+    <svg
+      className="hooded-figure"
+      viewBox="0 0 300 400"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      role="img"
+      aria-label="Mysterious figure in black hoodie"
+    >
+      <defs>
+        {/* Subtle glow filter for the figure */}
+        <filter id="hoodie-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        {/* Inner shadow for depth */}
+        <filter id="inner-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feOffset dx="0" dy="4" />
+          <feGaussianBlur stdDeviation="2" result="offset-blur"/>
+          <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+          <feFlood floodColor="rgba(0,0,0,0.6)" floodOpacity="1"/>
+          <feComposite operator="in" in2="inverse" result="shadow"/>
+          <feMerge>
+            <feMergeNode in="shadow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        {/* Gradient for the hoodie fabric - brighter, more visible */}
+        <linearGradient id="hoodie-fabric" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#1a1a1a" />
+          <stop offset="30%" stopColor="#1f1f1f" />
+          <stop offset="60%" stopColor="#161616" />
+          <stop offset="100%" stopColor="#0f0f0f" />
+        </linearGradient>
+        {/* Highlight on folds - more visible */}
+        <linearGradient id="hoodie-highlight" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(184,42,42,0.12)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.06)" />
+          <stop offset="100%" stopColor="rgba(184,42,42,0.08)" />
+        </linearGradient>
+        {/* Face shadow gradient - less opaque to show depth */}
+        <radialGradient id="face-shadow" cx="50%" cy="30%" r="60%">
+          <stop offset="0%" stopColor="rgba(0,0,0,0.7)" />
+          <stop offset="40%" stopColor="rgba(0,0,0,0.55)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.8)" />
+        </radialGradient>
+        {/* Eye glint - more visible */}
+        <radialGradient id="eye-glint" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(184,42,42,0.5)" />
+          <stop offset="100%" stopColor="rgba(184,42,42,0.1)" />
+        </radialGradient>
+      </defs>
+
+      {/* Outer ambient glow */}
+      <ellipse
+        cx="150" cy="320"
+        rx="100" ry="30"
+        fill="rgba(184,42,42,0.06)"
+        filter="url(#hoodie-glow)"
+      />
+
+      {/* Main hoodie body */}
+      <path
+        d="M80 380
+           L80 200
+           C80 160, 100 130, 150 130
+           C200 130, 220 160, 220 200
+           L220 380
+           C220 395, 205 405, 150 405
+           C95 405, 80 395, 80 380 Z"
+        fill="url(#hoodie-fabric)"
+        stroke="rgba(184,42,42,0.18)"
+        strokeWidth="1.2"
+        filter="url(#inner-shadow)"
+      />
+
+      {/* Hoodie highlight/fold suggestion */}
+      <path
+        d="M110 200
+           Q130 180, 150 185
+           Q170 190, 190 200"
+        stroke="url(#hoodie-highlight)"
+        strokeWidth="2"
+        fill="none"
+        opacity="0.9"
+      />
+
+      {/* Left shoulder fold */}
+      <path
+        d="M80 200
+           Q95 210, 105 230
+           Q110 240, 110 260"
+        stroke="rgba(184,42,42,0.1)"
+        strokeWidth="1.2"
+        fill="none"
+      />
+
+      {/* Right shoulder fold */}
+      <path
+        d="M220 200
+           Q205 210, 195 230
+           Q190 240, 190 260"
+        stroke="rgba(184,42,42,0.1)"
+        strokeWidth="1.2"
+        fill="none"
+      />
+
+      {/* Hood opening / face area */}
+      <ellipse
+        cx="150" cy="165"
+        rx="48" ry="42"
+        fill="url(#face-shadow)"
+      />
+
+      {/* Hood inner depth - lighter to show face cavity */}
+      <ellipse
+        cx="150" cy="170"
+        rx="42" ry="36"
+        fill="rgba(0,0,0,0.6)"
+      />
+
+      {/* Hood rim highlight - more visible */}
+      <ellipse
+        cx="150" cy="155"
+        rx="50" ry="44"
+        fill="none"
+        stroke="rgba(255,255,255,0.04)"
+        strokeWidth="1"
+      />
+
+      {/* Eyes - visible but mysterious */}
+      <ellipse
+        cx="135" cy="160"
+        rx="4" ry="3"
+        fill="url(#eye-glint)"
+        opacity="0.8"
+      />
+      <ellipse
+        cx="165" cy="160"
+        rx="4" ry="3"
+        fill="url(#eye-glint)"
+        opacity="0.7"
+      />
+
+      {/* Hood drawstring hints */}
+      <circle cx="135" cy="185" r="2.5" fill="rgba(184,42,42,0.2)" />
+      <circle cx="165" cy="185" r="2.5" fill="rgba(184,42,42,0.2)" />
+      <path
+        d="M135 185 Q150 180 165 185"
+        stroke="rgba(184,42,42,0.15)"
+        strokeWidth="1.5"
+        fill="none"
+        strokeLinecap="round"
+      />
+
+      {/* Chest pocket suggestion */}
+      <rect x="125" y="280" width="50" height="35" rx="3"
+        fill="rgba(0,0,0,0.5)"
+        stroke="rgba(184,42,42,0.12)"
+        strokeWidth="0.8"
+      />
+
+      {/* Zipper line */}
+      <path
+        d="M150 185 L150 280"
+        stroke="rgba(184,42,42,0.1)"
+        strokeWidth="1.2"
+        strokeDasharray="4 6"
+        strokeLinecap="round"
+      />
+
+      {/* Bottom hem detail */}
+      <path
+        d="M85 380 Q150 390 215 380"
+        stroke="rgba(184,42,42,0.12)"
+        strokeWidth="1.8"
+        fill="none"
+      />
+
+      {/* Particle/dust motes around figure */}
+      <g opacity="0.3" filter="url(#hoodie-glow)">
+        <circle cx="50" cy="100" r="1.2" fill="rgba(184,42,42,0.5)" />
+        <circle cx="260" cy="80" r="0.8" fill="rgba(184,42,42,0.4)" />
+        <circle cx="40" cy="300" r="1" fill="rgba(184,42,42,0.35)" />
+        <circle cx="270" cy="320" r="1.2" fill="rgba(184,42,42,0.4)" />
+        <circle cx="150" cy="50" r="0.7" fill="rgba(184,42,42,0.45)" />
+        <circle cx="150" cy="390" r="1" fill="rgba(184,42,42,0.3)" />
+      </g>
+    </svg>
+  )
 }
 
 // ============================================
@@ -1134,6 +1392,9 @@ function BackgroundMusic() {
   const [playing, setPlaying] = useState(false)
   const [blocked, setBlocked] = useState(false)
   const [visible, setVisible] = useState(true)
+  const playingRef = useRef(playing)
+
+  useEffect(() => { playingRef.current = playing }, [playing])
 
   useEffect(() => {
     const audio = audioRef.current
@@ -1145,7 +1406,7 @@ function BackgroundMusic() {
         .catch(() => { setBlocked(true); setPlaying(false) })
     }
     tryPlay()
-    const onInteract = () => { if (!playing) tryPlay() }
+    const onInteract = () => { if (!playingRef.current) tryPlay() }
     document.addEventListener('click', onInteract, { once: true })
     document.addEventListener('keydown', onInteract, { once: true })
     return () => {
@@ -1341,6 +1602,8 @@ function Hero({ sectionRef }) {
         <div className="hero-section__overlay" />
         <DustParticles className="hero-section__dust" />
         <DecorativePhoneFigures />
+        {/* Central hooded figure - Dev */}
+        <HoodedFigure />
         {/* Mysterious silhouettes */}
         <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" />
         <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
@@ -1814,7 +2077,7 @@ function Screenplay({ sectionRef }) {
         </div>
 
         <div className="screenplay-section__script">
-          {scenes.map((scene, index) => {
+          {scenes.map((scene) => {
             const key = `sp-scene-${scene.id}`
             const cls = getClass(key, 'cr', 'screenplay-scene')
 
