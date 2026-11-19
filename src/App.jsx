@@ -202,6 +202,326 @@ const InternalStyles = () => (
       .deco-jenga { opacity: 0.2; }
     }
 
+    /* ── MYSTERIOUS ATMOSPHERIC BACKGROUNDS ─────────────────────── */
+    /* Base section background - deep, layered darkness */
+    .section {
+      position: relative;
+      isolation: isolate;
+    }
+    .section::before {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(184,42,42,0.035), transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 70%, rgba(120,20,20,0.025), transparent 55%),
+        radial-gradient(ellipse 100% 100% at 50% 100%, rgba(30,10,10,0.08), transparent 40%),
+        #030303;
+      pointer-events: none;
+    }
+
+    /* Hero - ominous entrance */
+    .hero-section__bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .hero-section__bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        /* Deep fog layers */
+        radial-gradient(ellipse 120% 80% at 50% 100%, rgba(184,42,42,0.02), transparent 70%),
+        radial-gradient(ellipse 80% 120% at 10% 50%, rgba(80,15,15,0.015), transparent 60%),
+        radial-gradient(ellipse 80% 120% at 90% 50%, rgba(80,15,15,0.015), transparent 60%),
+        /* Light shafts from above */
+        linear-gradient(180deg, rgba(255,255,255,0.008) 0%, transparent 35%),
+        /* Subtle vignette */
+        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+      animation: hero-atmosphere 25s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero-section__overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.001) 0px,
+          rgba(255,255,255,0.001) 1px,
+          transparent 1px,
+          transparent 3px
+        ),
+        radial-gradient(ellipse at 50% 0%, rgba(184,42,42,0.015), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-section__dust {
+      position: absolute;
+      inset: -10%;
+      background-image:
+        radial-gradient(1px 1px at 15% 25%, rgba(184,42,42,0.15), transparent),
+        radial-gradient(1px 1px at 85% 75%, rgba(184,42,42,0.1), transparent),
+        radial-gradient(1.5px 1.5px at 45% 60%, rgba(255,255,255,0.04), transparent),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.03), transparent),
+        radial-gradient(1px 1px at 25% 80%, rgba(184,42,42,0.08), transparent),
+        radial-gradient(1.5px 1.5px at 60% 10%, rgba(255,255,255,0.02), transparent);
+      background-size: 400px 400px, 380px 380px, 420px 420px, 360px 360px, 440px 440px, 390px 390px;
+      animation: dust-drift 60s linear infinite;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    @keyframes hero-atmosphere {
+      0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      25% { transform: scale(1.02) rotate(0.3deg); opacity: 0.95; }
+      50% { transform: scale(1.01) rotate(-0.2deg); opacity: 1; }
+      75% { transform: scale(1.015) rotate(0.1deg); opacity: 0.97; }
+    }
+    @keyframes dust-drift {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-30px, -20px) rotate(90deg); }
+      50% { transform: translate(20px, -40px) rotate(180deg); }
+      75% { transform: translate(-20px, -10px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    /* Story section - building tension */
+    .story-section__bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .story-section__bg::before {
+      content: '';
+      position: absolute;
+      inset: -10%;
+      background:
+        /* Cold, creeping fog */
+        radial-gradient(ellipse 90% 60% at 15% 20%, rgba(184,42,42,0.018), transparent 65%),
+        radial-gradient(ellipse 70% 90% at 85% 80%, rgba(100,15,15,0.02), transparent 60%),
+        /* Horizontal mist bands */
+        linear-gradient(90deg,
+          transparent 0%,
+          rgba(184,42,42,0.008) 20%,
+          transparent 40%,
+          rgba(184,42,42,0.006) 60%,
+          transparent 80%,
+          rgba(184,42,42,0.008) 100%
+        ),
+        /* Deepening darkness at edges */
+        radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%);
+      animation: story-mist 40s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .story-section__bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        /* Subtle scanline texture */
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.0008) 0px,
+          rgba(255,255,255,0.0008) 1px,
+          transparent 1px,
+          transparent 4px
+        );
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    @keyframes story-mist {
+      0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.8; }
+      16% { transform: translateX(-2%) translateY(-1%) scale(1.01); opacity: 0.9; }
+      33% { transform: translateX(1%) translateY(-2%) scale(1.005); opacity: 0.85; }
+      50% { transform: translateX(-1.5%) translateY(1%) scale(1.01); opacity: 0.95; }
+      66% { transform: translateX(2%) translateY(-1.5%) scale(1.005); opacity: 0.85; }
+      83% { transform: translateX(-1%) translateY(2%) scale(1.01); opacity: 0.9; }
+    }
+
+    /* Screenplay section - cold, clinical, unsettling */
+    .screenplay-section__bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .screenplay-section__bg::before {
+      content: '';
+      position: absolute;
+      inset: -15%;
+      background:
+        /* Sharp, deliberate light shafts */
+        linear-gradient(135deg,
+          transparent 0%,
+          rgba(184,42,42,0.01) 15%,
+          transparent 30%,
+          rgba(184,42,42,0.008) 45%,
+          transparent 60%,
+          rgba(184,42,42,0.01) 75%,
+          transparent 90%
+        ),
+        /* Central focus glow */
+        radial-gradient(ellipse 60% 80% at 50% 50%, rgba(184,42,42,0.015), transparent 70%),
+        /* Corner oppression */
+        radial-gradient(ellipse 100% 100% at 0% 0%, rgba(0,0,0,0.5), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 100% 0%, rgba(0,0,0,0.5), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 0% 100%, rgba(0,0,0,0.5), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 100% 100%, rgba(0,0,0,0.5), transparent 50%);
+      animation: script-atmosphere 35s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .screenplay-section__bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        /* Grid-like texture suggesting script pages / confinement */
+        linear-gradient(rgba(184,42,42,0.003) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(184,42,42,0.003) 1px, transparent 1px);
+      background-size: 80px 80px;
+      animation: grid-drift 120s linear infinite;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    @keyframes script-atmosphere {
+      0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
+      20% { transform: scale(1.015) rotate(0.2deg); filter: hue-rotate(2deg); }
+      40% { transform: scale(1.005) rotate(-0.1deg); filter: hue-rotate(-1deg); }
+      60% { transform: scale(1.01) rotate(0.1deg); filter: hue-rotate(1.5deg); }
+      80% { transform: scale(1.008) rotate(-0.15deg); filter: hue-rotate(-0.5deg); }
+    }
+    @keyframes grid-drift {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: 80px 80px, -80px 80px; }
+    }
+
+    /* Closing section - finality, silence */
+    .closing-section__bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .closing-section__bg::before {
+      content: '';
+      position: absolute;
+      inset: -20%;
+      background:
+        /* Collapsing inward */
+        radial-gradient(ellipse at center, transparent 0%, rgba(184,42,42,0.01) 30%, transparent 70%),
+        radial-gradient(ellipse at center, transparent 0%, rgba(30,10,10,0.03) 40%, transparent 80%),
+        radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 60%),
+        /* Fading light */
+        linear-gradient(180deg, rgba(255,255,255,0.005) 0%, transparent 50%);
+      animation: closing-collapse 30s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .closing-section__vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+      pointer-events: none;
+    }
+
+    @keyframes closing-collapse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(0.95); opacity: 0.9; }
+    }
+
+    /* Silhouette shapes - mysterious figures in the mist */
+    .silhouette {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.04;
+      will-change: transform, opacity;
+    }
+    .silhouette--figure {
+      width: clamp(60px, 6vw, 100px);
+      height: clamp(140px, 14vw, 240px);
+      background: linear-gradient(180deg, transparent 0%, rgba(184,42,42,0.3) 50%, rgba(184,42,42,0.15) 100%);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 240'%3E%3Cpath d='M50 10 C70 10, 90 40, 90 80 L90 180 C90 220, 70 230, 50 230 C30 230, 10 220, 10 180 L10 80 C10 40, 30 10, 50 10 Z' fill='black'/%3E%3C/svg%3E");
+      mask-size: cover;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 240'%3E%3Cpath d='M50 10 C70 10, 90 40, 90 80 L90 180 C90 220, 70 230, 50 230 C30 230, 10 220, 10 180 L10 80 C10 40, 30 10, 50 10 Z' fill='black'/%3E%3C/svg%3E");
+      -webkit-mask-size: cover;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+    }
+    .silhouette--figure-1 { top: 20%; left: 8%; animation: silhouette-drift-1 45s ease-in-out infinite; }
+    .silhouette--figure-2 { top: 55%; right: 10%; animation: silhouette-drift-2 50s ease-in-out infinite; animation-delay: -15s; }
+    .silhouette--figure-3 { bottom: 15%; left: 12%; animation: silhouette-drift-3 55s ease-in-out infinite; animation-delay: -30s; }
+    .silhouette--figure-4 { top: 35%; right: 18%; animation: silhouette-drift-4 48s ease-in-out infinite; animation-delay: -8s; }
+
+    @keyframes silhouette-drift-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.03; }
+      25% { transform: translate(-15px, -20px) scale(1.02); opacity: 0.05; }
+      50% { transform: translate(10px, -10px) scale(0.98); opacity: 0.04; }
+      75% { transform: translate(-10px, 15px) scale(1.01); opacity: 0.05; }
+    }
+    @keyframes silhouette-drift-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.025; }
+      33% { transform: translate(20px, -15px) scale(1.03); opacity: 0.045; }
+      66% { transform: translate(-10px, 20px) scale(0.97); opacity: 0.03; }
+    }
+    @keyframes silhouette-drift-3 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.035; }
+      50% { transform: translate(15px, -25px) scale(1.02); opacity: 0.055; }
+    }
+    @keyframes silhouette-drift-4 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.02; }
+      40% { transform: translate(-20px, 10px) scale(1.04); opacity: 0.04; }
+      80% { transform: translate(10px, -15px) scale(0.96); opacity: 0.03; }
+    }
+
+    /* Red accent glimmer - subtle, mysterious */
+    .glimmer {
+      position: absolute;
+      pointer-events: none;
+      z-index: 2;
+      border-radius: 50%;
+      filter: blur(2px);
+      animation: glimmer-pulse 4s ease-in-out infinite;
+    }
+    .glimmer-1 { width: 4px; height: 4px; top: 18%; left: 12%; background: rgba(184,42,42,0.4); animation-delay: 0s; }
+    .glimmer-2 { width: 3px; height: 3px; top: 62%; right: 15%; background: rgba(184,42,42,0.35); animation-delay: -1s; }
+    .glimmer-3 { width: 5px; height: 5px; bottom: 20%; left: 20%; background: rgba(184,42,42,0.3); animation-delay: -2s; }
+    .glimmer-4 { width: 2px; height: 2px; top: 40%; right: 25%; background: rgba(184,42,42,0.45); animation-delay: -3s; }
+    .glimmer-5 { width: 4px; height: 4px; bottom: 35%; right: 8%; background: rgba(184,42,42,0.25); animation-delay: -1.5s; }
+
+    @keyframes glimmer-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; box-shadow: 0 0 4px currentColor; }
+      50% { transform: scale(2.5); opacity: 0.8; box-shadow: 0 0 16px currentColor; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-section__bg::before,
+      .hero-section__dust,
+      .story-section__bg::before,
+      .screenplay-section__bg::before,
+      .screenplay-section__bg::after,
+      .closing-section__bg::before,
+      .silhouette,
+      .glimmer { animation: none !important; }
+      .silhouette { opacity: 0.02 !important; }
+      .glimmer { opacity: 0.2 !important; transform: scale(1) !important; }
+    }
+    @media (max-width: 900px) {
+      .silhouette { opacity: 0.02; }
+      .glimmer { display: none; }
+    }
+    @media (max-width: 600px) {
+      .silhouette { display: none; }
+      .hero-section__dust { opacity: 0.3; }
+    }
+
     /* ── STORY SECTION ENHANCEMENTS ───────────────────────────── */
     .story-section {
       padding: clamp(100px, 14vw, 180px) 0;
@@ -1021,6 +1341,17 @@ function Hero({ sectionRef }) {
         <div className="hero-section__overlay" />
         <DustParticles className="hero-section__dust" />
         <DecorativePhoneFigures />
+        {/* Mysterious silhouettes */}
+        <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" />
+        <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
+        <div className="silhouette silhouette--figure silhouette--figure-3" aria-hidden="true" />
+        <div className="silhouette silhouette--figure silhouette--figure-4" aria-hidden="true" />
+        {/* Subtle red glimmers */}
+        <div className="glimmer glimmer-1" aria-hidden="true" />
+        <div className="glimmer glimmer-2" aria-hidden="true" />
+        <div className="glimmer glimmer-3" aria-hidden="true" />
+        <div className="glimmer glimmer-4" aria-hidden="true" />
+        <div className="glimmer glimmer-5" aria-hidden="true" />
       </div>
       <div className="hero-section__content container">
         <div className="hero-section__tagline reveal">A PSYCHOLOGICAL THRILLER</div>
@@ -1104,6 +1435,13 @@ He approaches the tower and places the final block, making the last move. The to
   return (
     <section id="story" ref={sectionRef} className="story-section section" aria-labelledby="story-title">
       <div className="story-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
+      {/* Mysterious silhouettes in the mist */}
+      <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" />
+      <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
+      <div className="silhouette silhouette--figure silhouette--figure-3" aria-hidden="true" />
+      <div className="glimmer glimmer-1" aria-hidden="true" />
+      <div className="glimmer glimmer-3" aria-hidden="true" />
+      <div className="glimmer glimmer-5" aria-hidden="true" />
       <div className="container">
 
         {/* Section header */}
@@ -1461,6 +1799,11 @@ function Screenplay({ sectionRef }) {
   return (
     <section id="screenplay" ref={sectionRef} className="screenplay-section section" aria-labelledby="screenplay-title">
       <div className="screenplay-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
+      {/* Cold, clinical silhouettes */}
+      <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
+      <div className="silhouette silhouette--figure silhouette--figure-4" aria-hidden="true" />
+      <div className="glimmer glimmer-2" aria-hidden="true" />
+      <div className="glimmer glimmer-4" aria-hidden="true" />
       <div className="container">
 
         <div className={getClass('sp-header', 'cr', 'section-header')} ref={setRef('sp-header')}>
@@ -1532,6 +1875,11 @@ function Closing({ sectionRef }) {
         <div className="closing-section__vignette" />
         <DustParticles />
         <DecorativePhoneFigures />
+        {/* Final collapsing silhouettes */}
+        <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" style={{ opacity: 0.02 }} />
+        <div className="silhouette silhouette--figure silhouette--figure-3" aria-hidden="true" style={{ opacity: 0.02 }} />
+        <div className="glimmer glimmer-3" aria-hidden="true" style={{ animationDuration: '6s' }} />
+        <div className="glimmer glimmer-5" aria-hidden="true" style={{ animationDuration: '7s' }} />
       </div>
       <div className="container">
         <div className="closing-section__content reveal">
