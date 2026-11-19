@@ -202,8 +202,8 @@ const InternalStyles = () => (
       .deco-jenga { opacity: 0.2; }
     }
 
-    /* ── MYSTERIOUS ATMOSPHERIC BACKGROUNDS ─────────────────────── */
-    /* Base section background - deep, layered darkness */
+    /* ── /* ── MYSTERIOUS ATMOSPHERIC BACKGROUNDS ─────────────────────── */
+    /* Base section background - deep, layered darkness with texture */
     .section {
       position: relative;
       isolation: isolate;
@@ -214,14 +214,44 @@ const InternalStyles = () => (
       inset: -20%;
       z-index: -1;
       background:
-        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(184,42,42,0.035), transparent 60%),
-        radial-gradient(ellipse 60% 80% at 80% 70%, rgba(120,20,20,0.025), transparent 55%),
-        radial-gradient(ellipse 100% 100% at 50% 100%, rgba(30,10,10,0.08), transparent 40%),
-        #030303;
+        /* Deep color zones */
+        radial-gradient(ellipse 90% 70% at 15% 25%, rgba(184,42,42,0.05), transparent 55%),
+        radial-gradient(ellipse 80% 90% at 85% 30%, rgba(120,60,20,0.035), transparent 50%),
+        radial-gradient(ellipse 70% 80% at 20% 80%, rgba(20,20,60,0.04), transparent 55%),
+        radial-gradient(ellipse 100% 100% at 80% 80%, rgba(60,15,15,0.03), transparent 45%),
+        radial-gradient(ellipse 110% 110% at 50% 100%, rgba(25,10,10,0.1), transparent 35%),
+        /* Subtle color atmosphere */
+        radial-gradient(ellipse 60% 60% at 50% 50%, rgba(184,42,42,0.015), transparent 70%),
+        /* Base darkness */
+        #020202;
       pointer-events: none;
     }
 
-    /* Hero - ominous entrance */
+    /* Global film grain overlay */
+    .section::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      animation: grain-shift 8s steps(10) infinite;
+    }
+
+    @keyframes grain-shift {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-1px, 1px); }
+      20% { transform: translate(1px, -1px); }
+      30% { transform: translate(-1px, -1px); }
+      40% { transform: translate(1px, 1px); }
+      50% { transform: translate(0, -1px); }
+      60% { transform: translate(-1px, 0); }
+      70% { transform: translate(1px, 0); }
+      80% { transform: translate(0, 1px); }
+      90% { transform: translate(-1px, 0); }
+    }
+/* Hero - ominous entrance with rich layers */
     .hero-section__bg {
       position: absolute;
       inset: 0;
@@ -231,64 +261,141 @@ const InternalStyles = () => (
     .hero-section__bg::before {
       content: '';
       position: absolute;
+      inset: -10%;
+      background:
+        /* Deep volumetric fog layers */
+        radial-gradient(ellipse 130% 90% at 50% 110%, rgba(184,42,42,0.035), transparent 65%),
+        radial-gradient(ellipse 90% 130% at 5% 50%, rgba(100,30,15,0.03), transparent 55%),
+        radial-gradient(ellipse 90% 130% at 95% 50%, rgba(100,30,15,0.03), transparent 55%),
+        radial-gradient(ellipse 70% 70% at 30% 30%, rgba(20,15,40,0.025), transparent 60%),
+        radial-gradient(ellipse 70% 70% at 70% 30%, rgba(20,15,40,0.025), transparent 60%),
+        /* God rays / light shafts */
+        linear-gradient(180deg,
+          rgba(255,255,255,0.015) 0%,
+          rgba(255,255,255,0.008) 15%,
+          transparent 25%,
+          rgba(184,42,42,0.005) 40%,
+          transparent 60%
+        ),
+        /* Ambient color wash */
+        radial-gradient(ellipse at 50% 80%, rgba(184,42,42,0.02), transparent 60%),
+        /* Deep vignette */
+        radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%);
+      animation: hero-atmosphere 30s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .hero-section__bg::after {
+      content: '';
+      position: absolute;
       inset: 0;
       background:
-        /* Deep fog layers */
-        radial-gradient(ellipse 120% 80% at 50% 100%, rgba(184,42,42,0.02), transparent 70%),
-        radial-gradient(ellipse 80% 120% at 10% 50%, rgba(80,15,15,0.015), transparent 60%),
-        radial-gradient(ellipse 80% 120% at 90% 50%, rgba(80,15,15,0.015), transparent 60%),
-        /* Light shafts from above */
-        linear-gradient(180deg, rgba(255,255,255,0.008) 0%, transparent 35%),
-        /* Subtle vignette */
-        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
-      animation: hero-atmosphere 25s ease-in-out infinite;
+        /* Subtle texture - vertical streaks */
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,0.0005) 0px,
+          rgba(255,255,255,0.0005) 1px,
+          transparent 1px,
+          transparent 6px
+        ),
+        /* Horizontal film damage */
+        repeating-linear-gradient(
+          0deg,
+          rgba(184,42,42,0.0003) 0px,
+          rgba(184,42,42,0.0003) 1px,
+          transparent 1px,
+          transparent 20px
+        );
       pointer-events: none;
+      opacity: 0.5;
     }
     .hero-section__overlay {
       position: absolute;
       inset: 0;
       background:
+        /* Scanline texture */
         repeating-linear-gradient(
           0deg,
-          rgba(255,255,255,0.001) 0px,
-          rgba(255,255,255,0.001) 1px,
+          rgba(255,255,255,0.0015) 0px,
+          rgba(255,255,255,0.0015) 1px,
           transparent 1px,
           transparent 3px
         ),
-        radial-gradient(ellipse at 50% 0%, rgba(184,42,42,0.015), transparent 70%);
+        /* Top light falloff */
+        radial-gradient(ellipse at 50% -10%, rgba(184,42,42,0.02), transparent 60%),
+        /* Corner darkening */
+        radial-gradient(ellipse at 0% 0%, rgba(0,0,0,0.3), transparent 50%),
+        radial-gradient(ellipse at 100% 0%, rgba(0,0,0,0.3), transparent 50%);
       pointer-events: none;
     }
     .hero-section__dust {
       position: absolute;
+      inset: -15%;
+      background-image:
+        /* Large slow motes */
+        radial-gradient(2px 2px at 12% 22%, rgba(184,42,42,0.2), transparent),
+        radial-gradient(1.5px 1.5px at 88% 78%, rgba(184,42,42,0.15), transparent),
+        radial-gradient(2px 2px at 42% 58%, rgba(255,220,180,0.08), transparent),
+        radial-gradient(1px 1px at 72% 28%, rgba(255,255,255,0.05), transparent),
+        radial-gradient(1.5px 1.5px at 28% 82%, rgba(184,42,42,0.12), transparent),
+        radial-gradient(2px 2px at 58% 12%, rgba(255,220,180,0.06), transparent),
+        /* Medium motes */
+        radial-gradient(1px 1px at 35% 45%, rgba(184,42,42,0.1), transparent),
+        radial-gradient(1px 1px at 65% 65%, rgba(255,255,255,0.04), transparent),
+        radial-gradient(1px 1px at 15% 65%, rgba(184,42,42,0.08), transparent),
+        radial-gradient(1px 1px at 85% 35%, rgba(255,220,180,0.05), transparent),
+        /* Small fast motes */
+        radial-gradient(0.5px 0.5px at 25% 15%, rgba(255,255,255,0.06), transparent),
+        radial-gradient(0.5px 0.5px at 75% 85%, rgba(184,42,42,0.08), transparent),
+        radial-gradient(0.5px 0.5px at 45% 75%, rgba(255,220,180,0.04), transparent),
+        radial-gradient(0.5px 0.5px at 55% 25%, rgba(255,255,255,0.05), transparent);
+      background-size:
+        420px 420px, 390px 390px, 440px 440px, 370px 370px, 460px 460px, 400px 400px,
+        380px 380px, 410px 410px, 360px 360px, 430px 430px,
+        300px 300px, 320px 320px, 280px 280px, 310px 310px;
+      animation: dust-drift 80s linear infinite;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .hero-section__embers {
+      position: absolute;
       inset: -10%;
       background-image:
-        radial-gradient(1px 1px at 15% 25%, rgba(184,42,42,0.15), transparent),
-        radial-gradient(1px 1px at 85% 75%, rgba(184,42,42,0.1), transparent),
-        radial-gradient(1.5px 1.5px at 45% 60%, rgba(255,255,255,0.04), transparent),
-        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.03), transparent),
-        radial-gradient(1px 1px at 25% 80%, rgba(184,42,42,0.08), transparent),
-        radial-gradient(1.5px 1.5px at 60% 10%, rgba(255,255,255,0.02), transparent);
-      background-size: 400px 400px, 380px 380px, 420px 420px, 360px 360px, 440px 440px, 390px 390px;
-      animation: dust-drift 60s linear infinite;
-      opacity: 0.6;
+        radial-gradient(3px 3px at 20% 85%, rgba(184,42,42,0.15), transparent),
+        radial-gradient(2px 2px at 80% 90%, rgba(200,80,30,0.12), transparent),
+        radial-gradient(2.5px 2.5px at 50% 95%, rgba(184,42,42,0.1), transparent),
+        radial-gradient(1.5px 1.5px at 35% 88%, rgba(220,100,40,0.08), transparent),
+        radial-gradient(2px 2px at 65% 82%, rgba(184,42,42,0.09), transparent);
+      background-size:
+        500px 500px, 480px 480px, 520px 520px, 460px 460px, 490px 490px;
+      animation: ember-rise 20s ease-in-out infinite;
+      opacity: 0.4;
       pointer-events: none;
     }
 
     @keyframes hero-atmosphere {
-      0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
-      25% { transform: scale(1.02) rotate(0.3deg); opacity: 0.95; }
-      50% { transform: scale(1.01) rotate(-0.2deg); opacity: 1; }
-      75% { transform: scale(1.015) rotate(0.1deg); opacity: 0.97; }
+      0%, 100% { transform: scale(1) rotate(0deg) translate(0,0); opacity: 1; }
+      12.5% { transform: scale(1.015) rotate(0.2deg) translate(-1%, 0.5%); opacity: 0.97; }
+      25% { transform: scale(1.02) rotate(0.3deg) translate(0.5%, -1%); opacity: 0.95; }
+      37.5% { transform: scale(1.018) rotate(-0.15deg) translate(-0.5%, 0.5%); opacity: 0.98; }
+      50% { transform: scale(1.01) rotate(-0.2deg) translate(1%, -0.5%); opacity: 1; }
+      62.5% { transform: scale(1.012) rotate(0.1deg) translate(-0.5%, -0.5%); opacity: 0.99; }
+      75% { transform: scale(1.015) rotate(0.15deg) translate(0.5%, 1%); opacity: 0.97; }
+      87.5% { transform: scale(1.01) rotate(-0.1deg) translate(-1%, -0.5%); opacity: 0.98; }
     }
     @keyframes dust-drift {
       0% { transform: translate(0, 0) rotate(0deg); }
-      25% { transform: translate(-30px, -20px) rotate(90deg); }
-      50% { transform: translate(20px, -40px) rotate(180deg); }
-      75% { transform: translate(-20px, -10px) rotate(270deg); }
+      16.6% { transform: translate(-25px, -15px) rotate(60deg); }
+      33.3% { transform: translate(15px, -35px) rotate(120deg); }
+      50% { transform: translate(-20px, -20px) rotate(180deg); }
+      66.6% { transform: translate(30px, -10px) rotate(240deg); }
+      83.3% { transform: translate(-10px, 10px) rotate(300deg); }
       100% { transform: translate(0, 0) rotate(360deg); }
     }
-
-    /* Hooded Figure - Central mysterious presence */
+    @keyframes ember-rise {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+      50% { transform: translateY(-40px) scale(1.1); opacity: 0.6; }
+    }
+/* Hooded Figure - Central mysterious presence */
     .hooded-figure {
       position: absolute;
       top: 50%;
@@ -362,21 +469,28 @@ const InternalStyles = () => (
       position: absolute;
       inset: -10%;
       background:
-        /* Cold, creeping fog */
-        radial-gradient(ellipse 90% 60% at 15% 20%, rgba(184,42,42,0.018), transparent 65%),
-        radial-gradient(ellipse 70% 90% at 85% 80%, rgba(100,15,15,0.02), transparent 60%),
-        /* Horizontal mist bands */
+        /* Cold, creeping fog - multi-layered */
+        radial-gradient(ellipse 90% 60% at 15% 20%, rgba(184,42,42,0.025), transparent 65%),
+        radial-gradient(ellipse 70% 90% at 85% 80%, rgba(100,15,15,0.025), transparent 60%),
+        radial-gradient(ellipse 80% 70% at 50% 10%, rgba(20,15,40,0.02), transparent 55%),
+        radial-gradient(ellipse 70% 80% at 50% 90%, rgba(30,10,20,0.02), transparent 55%),
+        /* Horizontal mist bands - animated */
         linear-gradient(90deg,
           transparent 0%,
-          rgba(184,42,42,0.008) 20%,
-          transparent 40%,
-          rgba(184,42,42,0.006) 60%,
-          transparent 80%,
-          rgba(184,42,42,0.008) 100%
+          rgba(184,42,42,0.012) 15%,
+          transparent 30%,
+          rgba(184,42,42,0.008) 45%,
+          transparent 55%,
+          rgba(120,60,20,0.01) 70%,
+          transparent 85%,
+          rgba(184,42,42,0.012) 100%
         ),
+        /* Subtle color atmosphere */
+        radial-gradient(ellipse 50% 50% at 30% 40%, rgba(184,42,42,0.01), transparent 70%),
+        radial-gradient(ellipse 50% 50% at 70% 60%, rgba(120,60,20,0.01), transparent 70%),
         /* Deepening darkness at edges */
-        radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.35) 100%);
-      animation: story-mist 40s ease-in-out infinite;
+        radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.45) 100%);
+      animation: story-mist 45s ease-in-out infinite;
       pointer-events: none;
     }
     .story-section__bg::after {
@@ -387,25 +501,61 @@ const InternalStyles = () => (
         /* Subtle scanline texture */
         repeating-linear-gradient(
           0deg,
-          rgba(255,255,255,0.0008) 0px,
-          rgba(255,255,255,0.0008) 1px,
+          rgba(255,255,255,0.001) 0px,
+          rgba(255,255,255,0.001) 1px,
           transparent 1px,
           transparent 4px
+        ),
+        /* Vertical film scratches */
+        repeating-linear-gradient(
+          90deg,
+          rgba(184,42,42,0.0004) 0px,
+          rgba(184,42,42,0.0004) 1px,
+          transparent 1px,
+          transparent 50px
         );
       pointer-events: none;
+      opacity: 0.6;
+    }
+    .story-section__fog {
+      position: absolute;
+      inset: -20%;
+      background-image:
+        radial-gradient(3px 3px at 10% 30%, rgba(184,42,42,0.08), transparent),
+        radial-gradient(2px 2px at 90% 70%, rgba(184,42,42,0.06), transparent),
+        radial-gradient(2.5px 2.5px at 40% 50%, rgba(255,220,180,0.04), transparent),
+        radial-gradient(1.5px 1.5px at 70% 40%, rgba(255,255,255,0.03), transparent),
+        radial-gradient(2px 2px at 25% 75%, rgba(184,42,42,0.05), transparent),
+        radial-gradient(3px 3px at 60% 20%, rgba(255,220,180,0.04), transparent),
+        radial-gradient(2px 2px at 85% 50%, rgba(184,42,42,0.05), transparent),
+        radial-gradient(1.5px 1.5px at 35% 85%, rgba(255,255,255,0.02), transparent);
+      background-size:
+        450px 450px, 420px 420px, 480px 480px, 400px 400px,
+        460px 460px, 430px 430px, 410px 410px, 390px 390px;
+      animation: story-fog-drift 70s linear infinite;
       opacity: 0.5;
+      pointer-events: none;
     }
 
     @keyframes story-mist {
       0%, 100% { transform: translateX(0) translateY(0) scale(1); opacity: 0.8; }
-      16% { transform: translateX(-2%) translateY(-1%) scale(1.01); opacity: 0.9; }
-      33% { transform: translateX(1%) translateY(-2%) scale(1.005); opacity: 0.85; }
-      50% { transform: translateX(-1.5%) translateY(1%) scale(1.01); opacity: 0.95; }
-      66% { transform: translateX(2%) translateY(-1.5%) scale(1.005); opacity: 0.85; }
-      83% { transform: translateX(-1%) translateY(2%) scale(1.01); opacity: 0.9; }
+      12.5% { transform: translateX(-1.5%) translateY(-0.5%) scale(1.008); opacity: 0.88; }
+      25% { transform: translateX(1%) translateY(-1.5%) scale(1.005); opacity: 0.85; }
+      37.5% { transform: translateX(-1%) translateY(0.5%) scale(1.01); opacity: 0.92; }
+      50% { transform: translateX(1.5%) translateY(-1%) scale(1.008); opacity: 0.95; }
+      62.5% { transform: translateX(-0.5%) translateY(1.5%) scale(1.005); opacity: 0.88; }
+      75% { transform: translateX(0.5%) translateY(-0.5%) scale(1.008); opacity: 0.9; }
+      87.5% { transform: translateX(-1%) translateY(1%) scale(1.005); opacity: 0.85; }
     }
-
-    /* Screenplay section - cold, clinical, unsettling */
+    @keyframes story-fog-drift {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-20px, -15px) rotate(72deg); }
+      40% { transform: translate(15px, -30px) rotate(144deg); }
+      60% { transform: translate(-15px, -10px) rotate(216deg); }
+      80% { transform: translate(25px, 5px) rotate(288deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+/* Screenplay section - cold, clinical, unsettling */
     .screenplay-section__bg {
       position: absolute;
       inset: 0;
@@ -420,21 +570,28 @@ const InternalStyles = () => (
         /* Sharp, deliberate light shafts */
         linear-gradient(135deg,
           transparent 0%,
-          rgba(184,42,42,0.01) 15%,
-          transparent 30%,
-          rgba(184,42,42,0.008) 45%,
-          transparent 60%,
-          rgba(184,42,42,0.01) 75%,
-          transparent 90%
+          rgba(184,42,42,0.015) 12%,
+          transparent 25%,
+          rgba(184,42,42,0.01) 38%,
+          transparent 50%,
+          rgba(120,60,20,0.012) 62%,
+          transparent 75%,
+          rgba(184,42,42,0.015) 88%,
+          transparent 100%
         ),
         /* Central focus glow */
-        radial-gradient(ellipse 60% 80% at 50% 50%, rgba(184,42,42,0.015), transparent 70%),
+        radial-gradient(ellipse 60% 80% at 50% 50%, rgba(184,42,42,0.02), transparent 70%),
+        /* Side accent glows */
+        radial-gradient(ellipse 40% 60% at 10% 50%, rgba(184,42,42,0.012), transparent 65%),
+        radial-gradient(ellipse 40% 60% at 90% 50%, rgba(184,42,42,0.012), transparent 65%),
         /* Corner oppression */
-        radial-gradient(ellipse 100% 100% at 0% 0%, rgba(0,0,0,0.5), transparent 50%),
-        radial-gradient(ellipse 100% 100% at 100% 0%, rgba(0,0,0,0.5), transparent 50%),
-        radial-gradient(ellipse 100% 100% at 0% 100%, rgba(0,0,0,0.5), transparent 50%),
-        radial-gradient(ellipse 100% 100% at 100% 100%, rgba(0,0,0,0.5), transparent 50%);
-      animation: script-atmosphere 35s ease-in-out infinite;
+        radial-gradient(ellipse 100% 100% at 0% 0%, rgba(0,0,0,0.55), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 100% 0%, rgba(0,0,0,0.55), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 0% 100%, rgba(0,0,0,0.55), transparent 50%),
+        radial-gradient(ellipse 100% 100% at 100% 100%, rgba(0,0,0,0.55), transparent 50%),
+        /* Subtle cool tone */
+        radial-gradient(ellipse 70% 70% at 50% 50%, rgba(15,15,30,0.03), transparent 65%);
+      animation: script-atmosphere 40s ease-in-out infinite;
       pointer-events: none;
     }
     .screenplay-section__bg::after {
@@ -443,27 +600,69 @@ const InternalStyles = () => (
       inset: 0;
       background-image:
         /* Grid-like texture suggesting script pages / confinement */
-        linear-gradient(rgba(184,42,42,0.003) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(184,42,42,0.003) 1px, transparent 1px);
+        linear-gradient(rgba(184,42,42,0.004) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(184,42,42,0.004) 1px, transparent 1px);
       background-size: 80px 80px;
-      animation: grid-drift 120s linear infinite;
+      animation: grid-drift 150s linear infinite;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+    .screenplay-section__scanlines {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.0008) 0px,
+          rgba(255,255,255,0.0008) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      animation: scanline-flicker 0.15s steps(2) infinite;
       pointer-events: none;
       opacity: 0.3;
+    }
+    .screenplay-section__glitch {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg,
+          transparent 0%,
+          rgba(184,42,42,0.003) 49%,
+          rgba(184,42,42,0.006) 50%,
+          rgba(184,42,42,0.003) 51%,
+          transparent 100%
+        );
+      animation: glitch-line 3s ease-in-out infinite;
+      pointer-events: none;
+      opacity: 0.5;
     }
 
     @keyframes script-atmosphere {
       0%, 100% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
-      20% { transform: scale(1.015) rotate(0.2deg); filter: hue-rotate(2deg); }
-      40% { transform: scale(1.005) rotate(-0.1deg); filter: hue-rotate(-1deg); }
-      60% { transform: scale(1.01) rotate(0.1deg); filter: hue-rotate(1.5deg); }
-      80% { transform: scale(1.008) rotate(-0.15deg); filter: hue-rotate(-0.5deg); }
+      16.6% { transform: scale(1.012) rotate(0.15deg); filter: hue-rotate(1.5deg); }
+      33.3% { transform: scale(1.005) rotate(-0.1deg); filter: hue-rotate(-1deg); }
+      50% { transform: scale(1.01) rotate(0.1deg); filter: hue-rotate(2deg); }
+      66.6% { transform: scale(1.008) rotate(-0.1deg); filter: hue-rotate(-0.5deg); }
+      83.3% { transform: scale(1.01) rotate(0.05deg); filter: hue-rotate(1deg); }
     }
     @keyframes grid-drift {
       0% { background-position: 0 0, 0 0; }
       100% { background-position: 80px 80px, -80px 80px; }
     }
-
-    /* Closing section - finality, silence */
+    @keyframes scanline-flicker {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.25; }
+    }
+    @keyframes glitch-line {
+      0%, 100% { transform: translateX(-100%); opacity: 0; }
+      5% { transform: translateX(-80%); opacity: 0.5; }
+      10% { transform: translateX(-60%); opacity: 0; }
+      90% { transform: translateX(100%); opacity: 0; }
+      95% { transform: translateX(120%); opacity: 0.5; }
+      100% { transform: translateX(140%); opacity: 0; }
+    }
+/* Closing section - finality, silence */
     .closing-section__bg {
       position: absolute;
       inset: 0;
@@ -475,28 +674,83 @@ const InternalStyles = () => (
       position: absolute;
       inset: -20%;
       background:
-        /* Collapsing inward */
-        radial-gradient(ellipse at center, transparent 0%, rgba(184,42,42,0.01) 30%, transparent 70%),
-        radial-gradient(ellipse at center, transparent 0%, rgba(30,10,10,0.03) 40%, transparent 80%),
-        radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, transparent 60%),
-        /* Fading light */
-        linear-gradient(180deg, rgba(255,255,255,0.005) 0%, transparent 50%);
-      animation: closing-collapse 30s ease-in-out infinite;
+        /* Collapsing inward - multi-ring */
+        radial-gradient(ellipse at center, transparent 0%, rgba(184,42,42,0.015) 20%, transparent 50%),
+        radial-gradient(ellipse at center, transparent 0%, rgba(184,42,42,0.01) 30%, transparent 65%),
+        radial-gradient(ellipse at center, transparent 0%, rgba(30,10,10,0.04) 35%, transparent 75%),
+        radial-gradient(ellipse at center, rgba(0,0,0,0.7) 0%, transparent 55%),
+        /* Fading light from above */
+        linear-gradient(180deg, rgba(255,255,255,0.008) 0%, transparent 40%),
+        /* Final ember glow at bottom */
+        radial-gradient(ellipse 80% 40% at 50% 100%, rgba(184,42,42,0.02), transparent 60%);
+      animation: closing-collapse 35s ease-in-out infinite;
       pointer-events: none;
+    }
+    .closing-section__bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        /* Heavy film grain */
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.0006) 0px,
+          rgba(255,255,255,0.0006) 1px,
+          transparent 1px,
+          transparent 2px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          rgba(184,42,42,0.0004) 0px,
+          rgba(184,42,42,0.0004) 1px,
+          transparent 1px,
+          transparent 8px
+        );
+      pointer-events: none;
+      opacity: 0.4;
     }
     .closing-section__vignette {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+      background:
+        radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.85) 100%),
+        radial-gradient(ellipse at 50% 0%, rgba(184,42,42,0.01), transparent 70%);
+      pointer-events: none;
+    }
+    .closing-section__particles {
+      position: absolute;
+      inset: -10%;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(184,42,42,0.1), transparent),
+        radial-gradient(1.5px 1.5px at 80% 40%, rgba(255,220,180,0.07), transparent),
+        radial-gradient(2px 2px at 40% 70%, rgba(184,42,42,0.08), transparent),
+        radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.04), transparent),
+        radial-gradient(1.5px 1.5px at 10% 60%, rgba(184,42,42,0.06), transparent),
+        radial-gradient(2px 2px at 90% 20%, rgba(255,220,180,0.05), transparent),
+        radial-gradient(1px 1px at 30% 10%, rgba(255,255,255,0.03), transparent),
+        radial-gradient(1.5px 1.5px at 60% 90%, rgba(184,42,42,0.05), transparent);
+      background-size:
+        400px 400px, 380px 380px, 420px 420px, 360px 360px,
+        440px 440px, 390px 390px, 370px 370px, 410px 410px;
+      animation: closing-particles 50s linear infinite;
+      opacity: 0.5;
       pointer-events: none;
     }
 
     @keyframes closing-collapse {
       0%, 100% { transform: scale(1); opacity: 0.7; }
+      25% { transform: scale(0.98); opacity: 0.8; }
       50% { transform: scale(0.95); opacity: 0.9; }
+      75% { transform: scale(0.97); opacity: 0.85; }
     }
-
-    /* Silhouette shapes - mysterious figures in the mist */
+    @keyframes closing-particles {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-15px, -20px) rotate(90deg); }
+      50% { transform: translate(10px, -15px) rotate(180deg); }
+      75% { transform: translate(-10px, 10px) rotate(270deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+/* Silhouette shapes - mysterious figures in the mist */
     .silhouette {
       position: absolute;
       pointer-events: none;
@@ -1601,6 +1855,7 @@ function Hero({ sectionRef }) {
       <div className="hero-section__bg slow-zoom">
         <div className="hero-section__overlay" />
         <DustParticles className="hero-section__dust" />
+        <div className="hero-section__embers" aria-hidden="true" />
         <DecorativePhoneFigures />
         {/* Central hooded figure - Dev */}
         <HoodedFigure />
@@ -1698,6 +1953,7 @@ He approaches the tower and places the final block, making the last move. The to
   return (
     <section id="story" ref={sectionRef} className="story-section section" aria-labelledby="story-title">
       <div className="story-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
+      <div className="story-section__fog" aria-hidden="true" />
       {/* Mysterious silhouettes in the mist */}
       <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" />
       <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
@@ -2062,6 +2318,8 @@ function Screenplay({ sectionRef }) {
   return (
     <section id="screenplay" ref={sectionRef} className="screenplay-section section" aria-labelledby="screenplay-title">
       <div className="screenplay-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
+      <div className="screenplay-section__scanlines" aria-hidden="true" />
+      <div className="screenplay-section__glitch" aria-hidden="true" />
       {/* Cold, clinical silhouettes */}
       <div className="silhouette silhouette--figure silhouette--figure-2" aria-hidden="true" />
       <div className="silhouette silhouette--figure silhouette--figure-4" aria-hidden="true" />
@@ -2138,6 +2396,7 @@ function Closing({ sectionRef }) {
         <div className="closing-section__vignette" />
         <DustParticles />
         <DecorativePhoneFigures />
+        <div className="closing-section__particles" aria-hidden="true" />
         {/* Final collapsing silhouettes */}
         <div className="silhouette silhouette--figure silhouette--figure-1" aria-hidden="true" style={{ opacity: 0.02 }} />
         <div className="silhouette silhouette--figure silhouette--figure-3" aria-hidden="true" style={{ opacity: 0.02 }} />
