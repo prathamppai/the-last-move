@@ -1,237 +1,489 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import './App.css'
 
 // ============================================
-// INTERNAL STYLES — Scroll-based text animations
+// INTERNAL STYLES
 // ============================================
-const ScrollAnimationStyles = () => (
-  <style dangerouslySetInnerHTML={ { __html: `
-    /* Scroll-based reveal animations for Story & Screenplay */
-    .scroll-reveal {
+const InternalStyles = () => (
+  <style dangerouslySetInnerHTML={{ __html: `
+    /* ── CINEMATIC SCROLL REVEAL ───────────────────────────────── */
+    /* Base hidden state: blurred, translated, transparent */
+    .cr {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(28px);
+      filter: blur(6px);
+      transition:
+        opacity  0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        filter   0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform, filter;
+    }
+    /* Visible state */
+    .cr.in {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+    }
+    /* Exit state: fade up and blur out gently when scrolling past */
+    .cr.out {
+      opacity: 0;
+      transform: translateY(-18px);
       filter: blur(4px);
-      will-change: opacity, transform, filter;
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition:
+        opacity  0.5s cubic-bezier(0.4, 0, 1, 1),
+        transform 0.5s cubic-bezier(0.4, 0, 1, 1),
+        filter   0.5s cubic-bezier(0.4, 0, 1, 1);
     }
-
-    .scroll-reveal.is-visible {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
-
-    /* Stagger delays for child elements */
-    .scroll-reveal-stagger > * {
+    /* Faster enter for small elements */
+    .cr-fast {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(16px);
       filter: blur(3px);
+      transition:
+        opacity  0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        filter   0.5s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: opacity, transform, filter;
-      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .cr-fast.in { opacity: 1; transform: translateY(0); filter: blur(0px); }
+    .cr-fast.out { opacity: 0; transform: translateY(-10px); filter: blur(2px); transition-duration: 0.35s; }
 
-    .scroll-reveal-stagger.is-visible > *:nth-child(1)  { transition-delay: 0ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(2)  { transition-delay: 60ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(3)  { transition-delay: 120ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(4)  { transition-delay: 180ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(5)  { transition-delay: 240ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(6)  { transition-delay: 300ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(7)  { transition-delay: 360ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(8)  { transition-delay: 420ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(9)  { transition-delay: 480ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(10) { transition-delay: 540ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(11) { transition-delay: 600ms; }
-    .scroll-reveal-stagger.is-visible > *:nth-child(12) { transition-delay: 660ms; }
+    /* Stagger delays applied via inline style on each child */
+    /* -- delay classes */
+    .cr-d1 { transition-delay: 80ms; }
+    .cr-d2 { transition-delay: 160ms; }
+    .cr-d3 { transition-delay: 240ms; }
+    .cr-d4 { transition-delay: 320ms; }
+    .cr-d5 { transition-delay: 400ms; }
+    .cr-d6 { transition-delay: 480ms; }
 
-    .scroll-reveal-stagger.is-visible > * {
-      opacity: 1;
-      transform: translateY(0);
-      filter: blur(0);
-    }
+    /* When exiting, remove delays so they all fade together */
+    .cr.out.cr-d1,
+    .cr.out.cr-d2,
+    .cr.out.cr-d3,
+    .cr.out.cr-d4,
+    .cr.out.cr-d5,
+    .cr.out.cr-d6,
+    .cr-fast.out.cr-d1,
+    .cr-fast.out.cr-d2,
+    .cr-fast.out.cr-d3,
+    .cr-fast.out.cr-d4,
+    .cr-fast.out.cr-d5,
+    .cr-fast.out.cr-d6 { transition-delay: 0ms; }
 
-    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .scroll-reveal,
-      .scroll-reveal-stagger > * {
-        opacity: 1 !important;
-        transform: none !important;
-        filter: none !important;
-        transition: none !important;
+      .cr, .cr-fast { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+    }
+    @media (max-width: 700px) {
+      .cr  { transform: translateY(18px); }
+      .cr-fast { transform: translateY(10px); }
+    }
+
+    /* ── STORY SECTION ENHANCEMENTS ───────────────────────────── */
+    .story-section {
+      padding: clamp(100px, 14vw, 180px) 0;
+    }
+    .story-section__acts {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .story-section__act {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0 clamp(32px, 5vw, 70px);
+      padding: clamp(44px, 6vw, 72px) 0;
+      border-top: 1px solid rgba(255,255,255,0.045);
+      align-items: start;
+      position: relative;
+    }
+    .story-section__act::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184,42,42,0.0) 15%, rgba(255,255,255,0.055) 50%, transparent);
+      pointer-events: none;
+    }
+    .story-section__act:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .story-section__act:last-child::after { display: none; }
+    .story-section__act-header {
+      position: sticky;
+      top: calc(78px + 24px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 2px;
+    }
+    .story-section__act-number {
+      font-size: 0.6rem;
+      letter-spacing: 0.28em;
+      color: var(--accent-red);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .story-section__act-title {
+      font-family: var(--font-display);
+      font-size: clamp(0.82rem, 1.2vw, 1.05rem);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #d8d0d0;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+    .story-section__act-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5em;
+    }
+    .story-section__act-para {
+      color: rgba(200,192,192,0.75);
+      font-family: var(--font-serif);
+      font-size: clamp(1.08rem, 1.55vw, 1.28rem);
+      line-height: 1.82;
+      white-space: pre-line;
+    }
+    .story-section__act:last-child .story-section__act-para {
+      color: rgba(160,152,152,0.65);
+      font-style: italic;
+    }
+    /* Ending special emphasis */
+    .story-section__act--ending .story-section__act-body {
+      border-left: 2px solid rgba(184,42,42,0.25);
+      padding-left: 1.5rem;
+      margin-left: 0.25rem;
+    }
+
+    /* Film-meta strip */
+    .story-section__meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.045);
+      border-radius: 3px;
+      margin-bottom: clamp(60px, 10vw, 100px);
+      overflow: hidden;
+    }
+    .story-section__meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: clamp(18px, 2.5vw, 28px);
+      background: rgba(8,8,8,0.9);
+      transition: background 0.3s ease;
+    }
+    .story-section__meta-item:hover {
+      background: rgba(14,10,10,0.95);
+    }
+    .story-section__meta-label {
+      font-family: var(--font-mono);
+      font-size: 0.57rem;
+      letter-spacing: 0.24em;
+      color: var(--accent-red);
+      text-transform: uppercase;
+    }
+    .story-section__meta-value {
+      color: rgba(160,150,150,0.85);
+      font-size: clamp(0.78rem, 1.1vw, 0.9rem);
+      line-height: 1.6;
+      font-family: var(--font-sans);
+    }
+
+    /* Mobile story */
+    @media (max-width: 800px) {
+      .story-section__act {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .story-section__act-header {
+        position: static;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+      .story-section__meta {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 500px) {
+      .story-section__meta {
+        grid-template-columns: 1fr;
       }
     }
 
-    /* Mobile optimizations */
-    @media (max-width: 700px) {
-      .scroll-reveal {
-        transform: translateY(20px);
-      }
-      .scroll-reveal-stagger > * {
-        transform: translateY(15px);
-      }
+    /* ── SCREENPLAY SECTION ENHANCEMENTS ──────────────────────── */
+    .screenplay-section {
+      padding: clamp(100px, 14vw, 180px) 0;
+      background:
+        radial-gradient(ellipse at 90% 10%, rgba(184,42,42,0.03), transparent 45%),
+        #050505;
     }
-  ` } } />
+    .screenplay-section__script {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    /* Scene block */
+    .screenplay-scene {
+      position: relative;
+      padding: clamp(32px, 4.5vw, 56px) 0;
+      border-top: 1px solid rgba(255,255,255,0.038);
+    }
+    .screenplay-scene:last-child {
+      border-bottom: 1px solid rgba(255,255,255,0.038);
+    }
+    /* Accent dot on scene left edge */
+    .screenplay-scene::before {
+      content: '';
+      position: absolute;
+      top: clamp(32px,4.5vw,56px);
+      left: -24px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent-red);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .screenplay-scene.in::before { opacity: 0.6; }
+
+    .screenplay-scene__header {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.025);
+    }
+    .screenplay-scene__number {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      color: var(--accent-red);
+      text-transform: uppercase;
+      min-width: 72px;
+      opacity: 0.9;
+    }
+    .screenplay-scene__title {
+      font-family: var(--font-display);
+      font-size: clamp(0.82rem, 1.4vw, 1.08rem);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: rgba(220,210,210,0.92);
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+    /* Scene description (action lines) */
+    .screenplay-line--scene-desc {
+      font-family: var(--font-sans);
+      font-size: clamp(0.88rem, 1.25vw, 1rem);
+      line-height: 1.78;
+      color: rgba(140,130,130,0.8);
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    .screenplay-line--action {
+      font-family: var(--font-sans);
+      font-size: clamp(0.88rem, 1.25vw, 1rem);
+      line-height: 1.72;
+      color: rgba(126,118,118,0.78);
+      margin-bottom: 8px;
+    }
+    /* Character name: centred, all caps, elevated */
+    .screenplay-line--character {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      color: rgba(224,210,210,0.92);
+      text-transform: uppercase;
+      margin-top: 20px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .screenplay-line--dialogue {
+      font-family: var(--font-serif);
+      font-size: clamp(0.95rem, 1.35vw, 1.08rem);
+      font-style: italic;
+      color: rgba(195,183,183,0.85);
+      line-height: 1.72;
+      padding: 0 clamp(20px, 6vw, 80px);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    /* Sub-scene */
+    .screenplay-subscene {
+      margin-top: 22px;
+      padding: 16px 0 4px clamp(16px, 3.5vw, 36px);
+      border-left: 1px solid rgba(255,255,255,0.055);
+      position: relative;
+    }
+    .screenplay-subscene::before {
+      content: '';
+      position: absolute;
+      top: 20px; left: 0;
+      width: 8px; height: 1px;
+      background: rgba(184,42,42,0.4);
+    }
+    .screenplay-subscene__number {
+      font-family: var(--font-mono);
+      font-size: 0.54rem;
+      letter-spacing: 0.18em;
+      color: rgba(100,88,88,0.75);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* Mobile screenplay */
+    @media (max-width: 800px) {
+      .screenplay-scene__header {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .screenplay-scene::before { display: none; }
+    }
+
+    /* ── STORY / SCREENPLAY SECTION HEADER POLISH ─────────────── */
+    .section-header {
+      margin-bottom: clamp(3rem, 7vw, 6rem);
+    }
+    .section-header__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--accent-red);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0.85;
+    }
+    .section-header__label::before {
+      content: '';
+      width: 28px; height: 1px;
+      background: var(--accent-red);
+      opacity: 0.6;
+    }
+    .section-header__title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      font-weight: 600;
+      letter-spacing: -0.065em;
+      line-height: 0.95;
+      text-transform: uppercase;
+    }
+  ` }} />
 )
 
 // ============================================
-// HOOK: useScrollReveal — Scroll-based reversible animations
+// HOOK: useCinematicReveal
+// Bi-directional: 'in' when entering, 'out' when exited above viewport.
 // ============================================
-function useScrollReveal(elementRefs, options = {}) {
+function useCinematicReveal(opts = {}) {
   const {
-    rootMargin = '0px 0px -15% 0px', // Trigger when element enters lower 85% of viewport
-    threshold = 0.05,
-    staggerDelay = 60,
-    maxStagger = 600,
-    once = false, // false = reversible, true = one-time
-  } = options
+    enterMargin = '-8%',   // how far into viewport before triggering in
+    exitTopMargin = '0px', // top margin — when above this, trigger out
+  } = opts
 
-  const [visibilityMap, setVisibilityMap] = useState({})
-  const observerRef = useRef(null)
+  const refs = useRef(new Map())
+  const stateMap = useRef({})         // 'hidden' | 'in' | 'out'
+  const [, forceUpdate] = useState(0)
   const rafRef = useRef(null)
-  const scrollYRef = useRef(0)
 
-  // Calculate visibility based on scroll position (for smooth, reversible animations)
-  const calculateVisibility = useCallback(() => {
-    if (!elementRefs.current || elementRefs.current.size === 0) return
+  const setRef = useCallback((key) => (el) => {
+    if (el) refs.current.set(key, el)
+    else refs.current.delete(key)
+  }, [])
 
-    const scrollY = window.scrollY
-    scrollYRef.current = scrollY
-    const viewportHeight = window.innerHeight
-    const triggerPoint = viewportHeight * 0.85 // Element triggers at 85% from top
+  const compute = useCallback(() => {
+    let changed = false
+    const vh = window.innerHeight
+    const enterThreshold = vh * 0.92  // element must be within 92% from top to enter
+    const exitThreshold = vh * 0.08   // element exits when its bottom is above 8% from top
 
-    const newVisibility = {}
-    let hasChanges = false
-
-    elementRefs.current.forEach((el, key) => {
+    refs.current.forEach((el, key) => {
       if (!el) return
       const rect = el.getBoundingClientRect()
-      const elementTop = rect.top + scrollY
-      const elementBottom = elementTop + rect.height
-      const scrollBottom = scrollY + viewportHeight
+      const prev = stateMap.current[key] || 'hidden'
+      let next = prev
 
-      // Calculate progress: 0 when element bottom at viewport top, 1 when element top at viewport 85%
-      const startReveal = elementTop - triggerPoint
-      const endReveal = elementBottom - scrollY
-      const revealDistance = rect.height + viewportHeight * 0.15
-
-      let progress = 0
-      if (scrollBottom > elementTop && scrollY < elementBottom) {
-        // Element is intersecting viewport
-        const intersectionStart = Math.max(scrollY, elementTop - viewportHeight)
-        const intersectionEnd = Math.min(scrollBottom, elementBottom)
-        const intersection = intersectionEnd - intersectionStart
-        progress = Math.min(1, Math.max(0, intersection / revealDistance))
-      } else if (scrollY >= elementBottom) {
-        // Scrolled past element
-        progress = 1
+      if (rect.bottom < exitThreshold) {
+        // Element has scrolled above viewport — fade out upward
+        next = 'out'
+      } else if (rect.top < enterThreshold && rect.bottom > exitThreshold) {
+        // Element is in view — reveal
+        next = 'in'
+      } else if (rect.top >= enterThreshold) {
+        // Element is below the fold — hidden, ready to enter
+        next = 'hidden'
       }
 
-      // For reversible: visible when progress > 0.15 (entered viewport enough)
-      const isVisible = progress > 0.15
-      const wasVisible = visibilityMap[key]
-
-      newVisibility[key] = isVisible
-      if (isVisible !== wasVisible) hasChanges = true
+      if (next !== prev) { stateMap.current[key] = next; changed = true }
     })
 
-    if (hasChanges) {
-      setVisibilityMap(prev => {
-        // Only update if actually changed
-        const changed = Object.keys(newVisibility).some(k => newVisibility[k] !== prev[k])
-        return changed ? newVisibility : prev
-      })
-    }
-  }, [elementRefs, visibilityMap])
+    if (changed) forceUpdate(n => n + 1)
+  }, [])
 
-  // RAF-based scroll handler for smooth 60fps updates
-  const handleScroll = useCallback(() => {
+  const onScroll = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    rafRef.current = requestAnimationFrame(calculateVisibility)
-  }, [calculateVisibility])
+    rafRef.current = requestAnimationFrame(compute)
+  }, [compute])
 
   useEffect(() => {
-    // Initial calculation
-    calculateVisibility()
-
-    // Scroll listener with passive flag for performance
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll, { passive: true })
-
+    compute()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [calculateVisibility, handleScroll])
+  }, [compute, onScroll])
 
-  // Also set up IntersectionObserver as fallback for elements that might be missed
-  useEffect(() => {
-    if (!elementRefs.current || elementRefs.current.size === 0) return
+  const getClass = useCallback((key, base = 'cr', extra = '') => {
+    const state = stateMap.current[key] || 'hidden'
+    const cls = state === 'in' ? `${base} in` : state === 'out' ? `${base} out` : base
+    return extra ? `${cls} ${extra}` : cls
+  }, [])
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const key = entry.target.dataset.scrollKey
-        if (!key) return
-        const isVisible = entry.isIntersecting && entry.intersectionRatio > 0.1
-        setVisibilityMap(prev => {
-          if (prev[key] !== isVisible) {
-            return { ...prev, [key]: isVisible }
-          }
-          return prev
-        })
-      })
-    }, { rootMargin, threshold })
-
-    elementRefs.current.forEach((el, key) => {
-      if (el) {
-        el.dataset.scrollKey = key
-        observer.observe(el)
-      }
-    })
-
-    return () => observer.disconnect()
-  }, [elementRefs, rootMargin, threshold])
-
-  return visibilityMap
+  return { setRef, getClass, stateMap: stateMap.current }
 }
 
 // ============================================
-// COMPONENT: FilmGrain - Ambient film grain overlay
+// COMPONENT: FilmGrain
 // ============================================
 function FilmGrain() {
   return <div className="film-grain" aria-hidden="true" />
 }
 
 // ============================================
-// COMPONENT: Vignette - Subtle vignette effect
+// COMPONENT: Vignette
 // ============================================
 function Vignette() {
   return <div className="vignette" aria-hidden="true" />
 }
 
 // ============================================
-// COMPONENT: DustParticles - Floating dust particles
+// COMPONENT: DustParticles
 // ============================================
 function DustParticles({ className = '' }) {
   return <div className={`dust-particles ${className}`} aria-hidden="true" />
 }
 
 // ============================================
-// COMPONENT: SkipLink - Accessibility skip link
+// COMPONENT: SkipLink
 // ============================================
 function SkipLink({ target }) {
-  return (
-    <a href={target} className="skip-link">
-      Skip to main content
-    </a>
-  )
+  return <a href={target} className="skip-link">Skip to main content</a>
 }
 
 // ============================================
-// COMPONENT: BackgroundMusic - Autoplay loop with fallback control
+// COMPONENT: BackgroundMusic
 // ============================================
 function BackgroundMusic() {
   const audioRef = useRef(null)
@@ -242,30 +494,16 @@ function BackgroundMusic() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-
     audio.volume = 0.35
     audio.loop = true
-
     const tryPlay = () => {
-      audio.play().then(() => {
-        setPlaying(true)
-        setBlocked(false)
-      }).catch(() => {
-        setBlocked(true)
-        setPlaying(false)
-      })
+      audio.play().then(() => { setPlaying(true); setBlocked(false) })
+        .catch(() => { setBlocked(true); setPlaying(false) })
     }
-
-    // Attempt autoplay immediately
     tryPlay()
-
-    // Also try on first user interaction
-    const onInteract = () => {
-      if (!playing) tryPlay()
-    }
+    const onInteract = () => { if (!playing) tryPlay() }
     document.addEventListener('click', onInteract, { once: true })
     document.addEventListener('keydown', onInteract, { once: true })
-
     return () => {
       document.removeEventListener('click', onInteract)
       document.removeEventListener('keydown', onInteract)
@@ -275,35 +513,20 @@ function BackgroundMusic() {
   const toggle = () => {
     const audio = audioRef.current
     if (!audio) return
-    if (playing) {
-      audio.pause()
-      setPlaying(false)
-    } else {
-      audio.play().then(() => {
-        setPlaying(true)
-        setBlocked(false)
-      }).catch(() => setBlocked(true))
-    }
+    if (playing) { audio.pause(); setPlaying(false) }
+    else { audio.play().then(() => { setPlaying(true); setBlocked(false) }).catch(() => setBlocked(true)) }
   }
 
   return (
     <>
       <audio ref={audioRef} src="/blurrynights.mp3" preload="auto" />
       {visible && (
-        <div
-          className={`music-control ${blocked && !playing ? 'music-control--blocked' : ''}`}
-          aria-label="Background music control"
-        >
-          <button
-            className="music-control__btn"
-            onClick={toggle}
-            aria-label={playing ? 'Pause background music' : 'Play background music'}
-            title={playing ? 'Pause music' : 'Play music'}
-          >
+        <div className={`music-control ${blocked && !playing ? 'music-control--blocked' : ''}`} aria-label="Background music control">
+          <button className="music-control__btn" onClick={toggle}
+            aria-label={playing ? 'Pause background music' : 'Play background music'}>
             {playing ? (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <rect x="6" y="4" width="4" height="16" rx="1"/>
-                <rect x="14" y="4" width="4" height="16" rx="1"/>
+                <rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>
               </svg>
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -314,11 +537,7 @@ function BackgroundMusic() {
               {blocked && !playing ? 'PLAY MUSIC' : playing ? 'MUSIC ON' : 'MUSIC OFF'}
             </span>
           </button>
-          <button
-            className="music-control__dismiss"
-            onClick={() => setVisible(false)}
-            aria-label="Dismiss music control"
-          >
+          <button className="music-control__dismiss" onClick={() => setVisible(false)} aria-label="Dismiss music control">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
@@ -330,7 +549,7 @@ function BackgroundMusic() {
 }
 
 // ============================================
-// COMPONENT: StudioIntro - Bablade Studios introduction sequence
+// COMPONENT: StudioIntro
 // ============================================
 function StudioIntro({ onComplete }) {
   const [state, setState] = useState('fade-in')
@@ -339,31 +558,20 @@ function StudioIntro({ onComplete }) {
 
   useEffect(() => {
     const skipTimer = setTimeout(() => setShowSkip(true), 1000)
-
     timeoutRef.current = setTimeout(() => {
       setState('hold')
       setTimeout(() => {
         setState('fade-out')
-        setTimeout(() => {
-          setState('done')
-          onComplete()
-        }, 1500)
+        setTimeout(() => { setState('done'); onComplete() }, 1500)
       }, 1500)
     }, 1500)
-
-    return () => {
-      clearTimeout(skipTimer)
-      clearTimeout(timeoutRef.current)
-    }
+    return () => { clearTimeout(skipTimer); clearTimeout(timeoutRef.current) }
   }, [onComplete])
 
   const handleSkip = useCallback(() => {
     clearTimeout(timeoutRef.current)
     setState('fade-out')
-    setTimeout(() => {
-      setState('done')
-      onComplete()
-    }, 500)
+    setTimeout(() => { setState('done'); onComplete() }, 500)
   }, [onComplete])
 
   if (state === 'done') return null
@@ -386,33 +594,16 @@ function StudioIntro({ onComplete }) {
         <DustParticles />
         <div className="studio-intro__glow" />
       </div>
-
       <div className="studio-intro__content">
         <div className="studio-intro__logo-wrap">
-          <img
-            src="/bablade.png"
-            alt="Babladé Studios"
-            className="studio-intro__logo-img"
-            onError={(e) => {
-              e.target.style.display = 'none'
-              e.target.nextSibling.style.display = 'block'
-            }}
-          />
-          <div className="studio-intro__name text-gradient glitch" data-text="BABLADÉ STUDIOS" style={{ display: 'none' }}>
+          <div className="studio-intro__name text-gradient glitch" data-text="BABLADÉ STUDIOS">
             BABLADÉ STUDIOS
           </div>
         </div>
-        <div className="studio-intro__presents">
-          PRESENTS
-        </div>
+        <div className="studio-intro__presents">PRESENTS</div>
       </div>
-
       {showSkip && (
-        <button
-          className="studio-intro__skip btn btn-ghost"
-          onClick={handleSkip}
-          aria-label="Skip studio introduction"
-        >
+        <button className="studio-intro__skip btn btn-ghost" onClick={handleSkip} aria-label="Skip studio introduction">
           SKIP INTRO
         </button>
       )}
@@ -421,7 +612,7 @@ function StudioIntro({ onComplete }) {
 }
 
 // ============================================
-// COMPONENT: Navigation - Sticky navigation bar
+// COMPONENT: Navigation
 // ============================================
 function Navigation({ activeSection, onNavigate }) {
   const [scrolled, setScrolled] = useState(false)
@@ -434,34 +625,24 @@ function Navigation({ activeSection, onNavigate }) {
   }, [])
 
   const navItems = [
-    { id: 'hero',       label: 'HOME' },
-    { id: 'story',      label: 'THE STORY' },
+    { id: 'hero', label: 'HOME' },
+    { id: 'story', label: 'THE STORY' },
     { id: 'screenplay', label: 'SCREENPLAY' },
   ]
 
   return (
     <>
       <SkipLink target="#main-content" />
-      <nav
-        className={`navigation ${scrolled ? 'scrolled' : ''}`}
-        role="navigation"
-        aria-label="Main navigation"
-      >
+      <nav className={`navigation ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="Main navigation">
         <div className="navigation__container container">
           <div className="navigation__logo" aria-label="The Last Move - Home">
             <img
-              src="/bablade.png"
+              src="/[bablade].png"
               alt="Babladé Studios"
               className="navigation__logo-img"
-              onError={(e) => {
-                e.target.style.display = 'none'
-                e.target.nextSibling.style.display = 'flex'
-              }}
             />
-            <span className="navigation__logo-mark" style={{ display: 'none' }}>TLM</span>
             <span className="navigation__logo-text">THE LAST MOVE</span>
           </div>
-
           <button
             className="navigation__toggle"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -473,21 +654,13 @@ function Navigation({ activeSection, onNavigate }) {
             <span className="navigation__toggle-bar" />
             <span className="navigation__toggle-bar" />
           </button>
-
-          <ul
-            id="nav-menu"
-            className={`navigation__menu ${mobileOpen ? 'open' : ''}`}
-            role="menubar"
-          >
+          <ul id="nav-menu" className={`navigation__menu ${mobileOpen ? 'open' : ''}`} role="menubar">
             {navItems.map((item) => (
               <li key={item.id} role="none">
                 <button
                   role="menuitem"
                   className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
-                  onClick={() => {
-                    onNavigate(item.id)
-                    setMobileOpen(false)
-                  }}
+                  onClick={() => { onNavigate(item.id); setMobileOpen(false) }}
                 >
                   {item.label}
                 </button>
@@ -501,7 +674,7 @@ function Navigation({ activeSection, onNavigate }) {
 }
 
 // ============================================
-// COMPONENT: ScrollIndicator - Animated scroll indicator
+// COMPONENT: ScrollIndicator
 // ============================================
 function ScrollIndicator() {
   return (
@@ -515,43 +688,24 @@ function ScrollIndicator() {
 }
 
 // ============================================
-// COMPONENT: Hero - Full-screen cinematic hero section
+// COMPONENT: Hero
 // ============================================
 function Hero({ sectionRef }) {
   return (
-    <section
-      id="hero"
-      ref={sectionRef}
-      className="hero-section section"
-      aria-labelledby="hero-title"
-    >
+    <section id="hero" ref={sectionRef} className="hero-section section" aria-labelledby="hero-title">
       <div className="hero-section__bg slow-zoom">
         <div className="hero-section__overlay" />
         <DustParticles className="hero-section__dust" />
       </div>
-
       <div className="hero-section__content container">
-        <div className="hero-section__tagline reveal">
-          A PSYCHOLOGICAL THRILLER
-        </div>
-
-        <h1
-          id="hero-title"
-          className="hero-section__title reveal glitch"
-          data-text="THE LAST MOVE"
-        >
+        <div className="hero-section__tagline reveal">A PSYCHOLOGICAL THRILLER</div>
+        <h1 id="hero-title" className="hero-section__title reveal glitch" data-text="THE LAST MOVE">
           THE LAST MOVE
         </h1>
-
         <div className="hero-section__divider reveal" style={{ transitionDelay: '200ms' }} />
-
-        <p
-          className="hero-section__tagline-text reveal serif"
-          style={{ transitionDelay: '300ms' }}
-        >
+        <p className="hero-section__tagline-text reveal serif" style={{ transitionDelay: '300ms' }}>
           "Every game has a final move. Every friendship has a breaking point."
         </p>
-
         <div className="hero-section__meta reveal" style={{ transitionDelay: '400ms' }}>
           <span className="hero-section__genre">PSYCHOLOGICAL THRILLER</span>
           <span className="hero-section__divider" aria-hidden="true" />
@@ -560,14 +714,13 @@ function Hero({ sectionRef }) {
           <span className="hero-section__theme">PARANORMAL DRAMA</span>
         </div>
       </div>
-
       <ScrollIndicator />
     </section>
   )
 }
 
 // ============================================
-// COMPONENT: Story - Five-act story from PDF pages 1-2
+// COMPONENT: Story
 // ============================================
 function Story({ sectionRef }) {
   const acts = [
@@ -621,46 +774,32 @@ He approaches the tower and places the final block, making the last move. The to
     }
   ]
 
-  // Refs for each animatable element
-  const elementRefs = useRef(new Map())
-  const visibilityMap = useScrollReveal(elementRefs, { rootMargin: '0px 0px -15% 0px' })
-
-  // Register ref callback
-  const setRef = useCallback((key) => (el) => {
-    if (el) {
-      elementRefs.current.set(key, el)
-    } else {
-      elementRefs.current.delete(key)
-    }
-  }, [])
+  const { setRef, getClass } = useCinematicReveal()
 
   return (
-    <section
-      id="story"
-      ref={sectionRef}
-      className="story-section section"
-      aria-labelledby="story-title"
-    >
-      <div className="story-section__bg">
-        <DustParticles />
-      </div>
-
+    <section id="story" ref={sectionRef} className="story-section section" aria-labelledby="story-title">
+      <div className="story-section__bg"><DustParticles /></div>
       <div className="container">
-        <div className="section-header scroll-reveal" ref={setRef('story-header')}>
+
+        {/* Section header */}
+        <div className={getClass('story-header', 'cr', 'section-header')}>
           <span className="section-header__label">THE NARRATIVE</span>
           <h2 id="story-title" className="section-header__title glitch" data-text="THE STORY">
             THE STORY
           </h2>
         </div>
+        {/* dummy ref registration */}
+        <span ref={setRef('story-header')} style={{ display: 'none' }} aria-hidden="true" />
 
-        <div className="story-section__meta scroll-reveal" ref={setRef('story-meta')}>
+        {/* Meta strip */}
+        <div className={getClass('story-meta', 'cr', 'story-section__meta')} ref={setRef('story-meta')}>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">GENRE</span>
             <span className="story-section__meta-value">Psychological Thriller / Mystery / Paranormal Drama</span>
           </div>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">THEMES</span>
-            <span className="story-section__meta-value">Friendship, Betrayal, Guilt & Forgiveness</span>
+            <span className="story-section__meta-value">Friendship, Betrayal, Guilt &amp; Forgiveness</span>
           </div>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">CENTRAL SYMBOL</span>
@@ -672,17 +811,18 @@ He approaches the tower and places the final block, making the last move. The to
           </div>
         </div>
 
+        {/* Acts */}
         <div className="story-section__acts">
           {acts.map((act, index) => {
-            const actKey = `story-act-${act.number}`
-            const isVisible = visibilityMap[actKey]
+            const key = `story-act-${index}`
             const paragraphs = act.body.split('\n\n').filter(Boolean)
+            const isEnding = act.number === 'ENDING'
 
             return (
               <article
                 key={act.number}
-                ref={setRef(actKey)}
-                className={`story-section__act scroll-reveal-stagger ${isVisible ? 'is-visible' : ''}`}
+                ref={setRef(key)}
+                className={getClass(key, 'cr', `story-section__act${isEnding ? ' story-section__act--ending' : ''}`)}
               >
                 <div className="story-section__act-header">
                   <span className="story-section__act-number mono">{act.number}</span>
@@ -692,34 +832,26 @@ He approaches the tower and places the final block, making the last move. The to
                 </div>
                 <div className="story-section__act-body">
                   {paragraphs.map((para, i) => (
-                    <p key={i} className="story-section__act-para serif">{para}</p>
+                    <p key={i} className={`story-section__act-para cr-fast cr-d${Math.min(i + 1, 6)} ${getClass(key, 'cr-fast', '').includes('in') ? 'in' : getClass(key, 'cr-fast', '').includes('out') ? 'out' : ''}`}>
+                      {para}
+                    </p>
                   ))}
                 </div>
               </article>
             )
           })}
         </div>
+
       </div>
     </section>
   )
 }
 
 // ============================================
-// COMPONENT: Screenplay - Full scene breakdown from PDF pages 3-7
+// COMPONENT: Screenplay
 // ============================================
 function Screenplay({ sectionRef }) {
-  // Refs for each animatable element
-  const elementRefs = useRef(new Map())
-  const visibilityMap = useScrollReveal(elementRefs, { rootMargin: '0px 0px -15% 0px' })
-
-  // Register ref callback
-  const setRef = useCallback((key) => (el) => {
-    if (el) {
-      elementRefs.current.set(key, el)
-    } else {
-      elementRefs.current.delete(key)
-    }
-  }, [])
+  const { setRef, getClass } = useCinematicReveal()
 
   const scenes = [
     {
@@ -1002,18 +1134,11 @@ function Screenplay({ sectionRef }) {
   ]
 
   return (
-    <section
-      id="screenplay"
-      ref={sectionRef}
-      className="screenplay-section section"
-      aria-labelledby="screenplay-title"
-    >
-      <div className="screenplay-section__bg">
-        <DustParticles />
-      </div>
-
+    <section id="screenplay" ref={sectionRef} className="screenplay-section section" aria-labelledby="screenplay-title">
+      <div className="screenplay-section__bg"><DustParticles /></div>
       <div className="container">
-        <div className="section-header scroll-reveal" ref={setRef('screenplay-header')}>
+
+        <div className={getClass('sp-header', 'cr', 'section-header')} ref={setRef('sp-header')}>
           <span className="section-header__label">THE SCRIPT</span>
           <h2 id="screenplay-title" className="section-header__title glitch" data-text="SCREENPLAY">
             SCREENPLAY
@@ -1022,14 +1147,14 @@ function Screenplay({ sectionRef }) {
 
         <div className="screenplay-section__script">
           {scenes.map((scene, index) => {
-            const sceneKey = `screenplay-scene-${scene.id}`
-            const isVisible = visibilityMap[sceneKey]
+            const key = `sp-scene-${scene.id}`
+            const cls = getClass(key, 'cr', 'screenplay-scene')
 
             return (
               <article
                 key={scene.id}
-                ref={setRef(sceneKey)}
-                className={`screenplay-scene scroll-reveal-stagger ${isVisible ? 'is-visible' : ''}`}
+                ref={setRef(key)}
+                className={cls}
               >
                 <header className="screenplay-scene__header">
                   <span className="screenplay-scene__number mono">{scene.number}</span>
@@ -1046,14 +1171,12 @@ function Screenplay({ sectionRef }) {
                   ))}
 
                   {scene.subscenes && scene.subscenes.map((sub) => {
-                    const subKey = `screenplay-sub-${sub.id}`
-                    const subVisible = visibilityMap[subKey]
-
+                    const subKey = `sp-sub-${sub.id}`
                     return (
                       <div
                         key={sub.id}
                         ref={setRef(subKey)}
-                        className={`screenplay-subscene scroll-reveal-stagger ${subVisible ? 'is-visible' : ''}`}
+                        className={getClass(subKey, 'cr-fast', 'screenplay-subscene')}
                       >
                         <div className="screenplay-subscene__number mono">{sub.number}</div>
                         {sub.lines.map((line, i) => (
@@ -1075,36 +1198,23 @@ function Screenplay({ sectionRef }) {
 }
 
 // ============================================
-// COMPONENT: Closing - Final cinematic closing
+// COMPONENT: Closing
 // ============================================
 function Closing({ sectionRef }) {
   return (
-    <section
-      id="closing"
-      ref={sectionRef}
-      className="closing-section section"
-      aria-labelledby="closing-title"
-    >
+    <section id="closing" ref={sectionRef} className="closing-section section" aria-labelledby="closing-title">
       <div className="closing-section__bg">
         <div className="closing-section__vignette" />
         <DustParticles />
       </div>
-
       <div className="container">
         <div className="closing-section__content reveal">
           <h1 id="closing-title" className="closing-section__title glitch" data-text="THE LAST MOVE">
             THE LAST MOVE
           </h1>
-
           <div className="closing-section__divider" aria-hidden="true" />
-
-          <p className="closing-section__credit serif">
-            A FILM BY
-          </p>
-
-          <p className="closing-section__studio text-gradient">
-            BABLADÉ STUDIOS
-          </p>
+          <p className="closing-section__credit serif">A FILM BY</p>
+          <p className="closing-section__studio text-gradient">BABLADÉ STUDIOS</p>
         </div>
       </div>
     </section>
@@ -1139,16 +1249,12 @@ function App() {
   const handleScroll = useCallback(() => {
     const scrollY = window.scrollY + window.innerHeight / 3
     const sectionIds = ['hero', 'story', 'screenplay', 'closing']
-
     for (const id of sectionIds) {
       const el = sectionElements.current[id]
       if (el) {
         const top = el.offsetTop
         const bottom = top + el.offsetHeight
-        if (scrollY >= top && scrollY < bottom) {
-          setActiveSection(id)
-          break
-        }
+        if (scrollY >= top && scrollY < bottom) { setActiveSection(id); break }
       }
     }
   }, [])
@@ -1158,43 +1264,28 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  // Intersection Observer for reveal animations
+  // IntersectionObserver for .reveal elements (hero + closing)
   useEffect(() => {
     if (showIntro) return
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible')
-          }
-        })
-      },
+      (entries) => { entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible') }) },
       { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     )
-
-    document.querySelectorAll('.reveal:not(.visible)').forEach((el) => {
-      observer.observe(el)
-    })
-
+    document.querySelectorAll('.reveal:not(.visible)').forEach((el) => observer.observe(el))
     return () => observer.disconnect()
   }, [showIntro])
 
   return (
     <>
-      <ScrollAnimationStyles />
+      <InternalStyles />
       <FilmGrain />
       <Vignette />
       <BackgroundMusic />
 
-      {showIntro && (
-        <StudioIntro onComplete={handleIntroComplete} />
-      )}
+      {showIntro && <StudioIntro onComplete={handleIntroComplete} />}
 
       {!showIntro && (
-        <Navigation
-          activeSection={activeSection}
-          onNavigate={handleNavigate}
-        />
+        <Navigation activeSection={activeSection} onNavigate={handleNavigate} />
       )}
 
       <main id="main-content" role="main">
