@@ -3,6 +3,83 @@
    Cinematic Film Website Stylesheet
    ========================================================= */
 
+/* =========================================================
+   GLITCH EFFECT — Fast, text-only glitch for key titles
+   ========================================================= */
+
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+.glitch::before {
+  color: var(--accent-red);
+  animation: glitch-fast-1 0.4s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+  color: #00ffff;
+  animation: glitch-fast-2 0.35s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-fast-1 {
+  0%   { clip: rect(4px, 9999px, 8px, 0); transform: translate(-1px, 0); }
+  10%  { clip: rect(12px, 9999px, 18px, 0); transform: translate(1px, 0); }
+  20%  { clip: rect(2px, 9999px, 6px, 0); transform: translate(-1px, 1px); }
+  30%  { clip: rect(20px, 9999px, 26px, 0); transform: translate(1px, -1px); }
+  40%  { clip: rect(30px, 9999px, 34px, 0); transform: translate(0, 1px); }
+  50%  { clip: rect(8px, 9999px, 14px, 0); transform: translate(-1px, -1px); }
+  60%  { clip: rect(16px, 9999px, 22px, 0); transform: translate(1px, 0); }
+  70%  { clip: rect(24px, 9999px, 28px, 0); transform: translate(-1px, 1px); }
+  80%  { clip: rect(6px, 9999px, 10px, 0); transform: translate(1px, -1px); }
+  90%  { clip: rect(18px, 9999px, 24px, 0); transform: translate(0, 1px); }
+  100% { clip: rect(10px, 9999px, 16px, 0); transform: translate(-1px, 0); }
+}
+
+@keyframes glitch-fast-2 {
+  0%   { clip: rect(6px, 9999px, 10px, 0); transform: translate(1px, 0); }
+  15%  { clip: rect(18px, 9999px, 22px, 0); transform: translate(-1px, 1px); }
+  30%  { clip: rect(4px, 9999px, 8px, 0); transform: translate(1px, -1px); }
+  45%  { clip: rect(22px, 9999px, 28px, 0); transform: translate(-1px, 0); }
+  60%  { clip: rect(12px, 9999px, 16px, 0); transform: translate(1px, 1px); }
+  75%  { clip: rect(28px, 9999px, 32px, 0); transform: translate(-1px, -1px); }
+  90%  { clip: rect(2px, 9999px, 6px, 0); transform: translate(1px, 0); }
+  100% { clip: rect(14px, 9999px, 18px, 0); transform: translate(-1px, 1px); }
+}
+
+/* Subtle glitch on hover for more intensity */
+.glitch:hover::before {
+  animation-duration: 0.15s;
+  color: #ff0044;
+}
+
+.glitch:hover::after {
+  animation-duration: 0.12s;
+  color: #00ffff;
+}
+
+/* Reduced motion: disable glitch */
+@media (prefers-reduced-motion: reduce) {
+  .glitch::before,
+  .glitch::after {
+    animation: none;
+    clip: auto;
+    opacity: 0;
+  }
+}
+
 /* -------------------- GLOBAL -------------------- */
 
 body {

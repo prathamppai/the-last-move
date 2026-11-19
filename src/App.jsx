@@ -79,6 +79,129 @@ const InternalStyles = () => (
       .cr-fast { transform: translateY(10px); }
     }
 
+    /* ── DECORATIVE PHONE FIGURES ───────────────────────────────── */
+    .deco-phone {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+      will-change: transform, opacity;
+    }
+    .hero-section__bg .deco-phone,
+    .story-section__bg .deco-phone,
+    .screenplay-section__bg .deco-phone,
+    .closing-section__bg .deco-phone {
+      animation: phone-float 20s ease-in-out infinite;
+    }
+    .deco-phone--1 {
+      width: clamp(80px, 8vw, 140px);
+      height: clamp(120px, 12vw, 210px);
+      top: 15%;
+      left: 5%;
+      animation-delay: 0s;
+      transform-origin: center center;
+    }
+    .deco-phone--2 {
+      width: clamp(60px, 6vw, 100px);
+      height: clamp(120px, 12vw, 200px);
+      top: 60%;
+      right: 8%;
+      animation-delay: -4s;
+      transform-origin: center center;
+    }
+    .deco-phone--3 {
+      width: clamp(70px, 7vw, 120px);
+      height: clamp(140px, 14vw, 240px);
+      bottom: 10%;
+      left: 3%;
+      animation-delay: -8s;
+      transform-origin: center center;
+    }
+    .deco-phone--4 {
+      width: clamp(50px, 5vw, 80px);
+      height: clamp(90px, 9vw, 150px);
+      top: 35%;
+      right: 15%;
+      animation-delay: -12s;
+      transform-origin: center center;
+    }
+    .deco-phone--5 {
+      width: clamp(60px, 6vw, 100px);
+      height: clamp(110px, 11vw, 180px);
+      bottom: 25%;
+      right: 5%;
+      animation-delay: -16s;
+      transform-origin: center center;
+    }
+    .deco-jenga {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+      animation: jenga-float 15s ease-in-out infinite;
+    }
+    .deco-jenga--1 {
+      width: clamp(100px, 10vw, 180px);
+      height: clamp(40px, 4vw, 72px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      animation-delay: -2s;
+    }
+    .deco-particles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.3;
+      animation: particles-drift 30s linear infinite;
+    }
+    .deco-accent-line {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    @keyframes phone-float {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.5; }
+      12.5% { transform: translateY(-20px) translateX(10px) rotate(2deg); opacity: 0.7; }
+      25% { transform: translateY(-10px) translateX(-15px) rotate(-1deg); opacity: 0.55; }
+      37.5% { transform: translateY(-30px) translateX(5px) rotate(1.5deg); opacity: 0.65; }
+      50% { transform: translateY(-15px) translateX(-10px) rotate(-0.5deg); opacity: 0.5; }
+      62.5% { transform: translateY(-25px) translateX(15px) rotate(1deg); opacity: 0.7; }
+      75% { transform: translateY(-5px) translateX(-5px) rotate(-1.5deg); opacity: 0.55; }
+      87.5% { transform: translateY(-35px) translateX(0px) rotate(0.5deg); opacity: 0.6; }
+    }
+    @keyframes jenga-float {
+      0%, 100% { transform: translate(-50%, -50%) rotate(-12deg) translateY(0); opacity: 0.35; }
+      50% { transform: translate(-50%, -50%) rotate(-12deg) translateY(-15px); opacity: 0.5; }
+    }
+    @keyframes particles-drift {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); }
+      25% { transform: translateY(-50px) translateX(30px) rotate(90deg); }
+      50% { transform: translateY(-100px) translateX(-20px) rotate(180deg); }
+      75% { transform: translateY(-50px) translateX(-40px) rotate(270deg); }
+      100% { transform: translateY(0) translateX(0) rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .deco-phone,
+      .deco-jenga,
+      .deco-particles { animation: none !important; opacity: 0.3; }
+    }
+    @media (max-width: 900px) {
+      .deco-phone { opacity: 0.35; }
+      .deco-phone--3, .deco-phone--5 { display: none; }
+    }
+    @media (max-width: 600px) {
+      .deco-phone { opacity: 0.25; }
+      .deco-phone--2, .deco-phone--4 { display: none; }
+      .deco-jenga { opacity: 0.2; }
+    }
+
     /* ── STORY SECTION ENHANCEMENTS ───────────────────────────── */
     .story-section {
       padding: clamp(100px, 14vw, 180px) 0;
@@ -455,6 +578,207 @@ function useCinematicReveal(opts = {}) {
 }
 
 // ============================================
+// COMPONENT: DecorativePhoneFigures
+// Artistic phone illustrations for visual enhancement
+// ============================================
+function DecorativePhoneFigures() {
+  return (
+    <>
+      {/* Phone 1 - Classic rotary style, top left */}
+      <svg
+        className="deco-phone deco-phone--1"
+        viewBox="0 0 120 180"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="phone-glow-1" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path
+          d="M60 10 C90 10, 110 30, 110 60 L110 140 C110 170, 90 190, 60 190 C30 190, 10 170, 10 140 L10 60 C10 30, 30 10, 60 10 Z"
+          stroke="rgba(184,42,42,0.15)"
+          strokeWidth="1.5"
+          filter="url(#phone-glow-1)"
+        />
+        <circle cx="60" cy="100" r="28" stroke="rgba(184,42,42,0.1)" strokeWidth="1" fill="rgba(8,8,8,0.4)" />
+        <circle cx="60" cy="100" r="18" stroke="rgba(184,42,42,0.08)" strokeWidth="0.5" fill="none" />
+        <path d="M60 85 L60 115" stroke="rgba(184,42,42,0.12)" strokeWidth="1.5" strokeLinecap="round" />
+        <path d="M45 100 L75 100" stroke="rgba(184,42,42,0.12)" strokeWidth="1.5" strokeLinecap="round" />
+        <ellipse cx="60" cy="25" rx="18" ry="8" stroke="rgba(184,42,42,0.1)" strokeWidth="1" fill="rgba(8,8,8,0.3)" />
+        <path d="M50 20 Q60 15 70 20" stroke="rgba(184,42,42,0.08)" strokeWidth="1" fill="none" />
+      </svg>
+
+      {/* Phone 2 - Modern smartphone, floating */}
+      <svg
+        className="deco-phone deco-phone--2"
+        viewBox="0 0 80 160"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="phone-glow-2" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect x="5" y="5" width="70" height="150" rx="12" stroke="rgba(255,255,255,0.03)" strokeWidth="1" fill="rgba(8,8,8,0.5)" filter="url(#phone-glow-2)" />
+        <rect x="12" y="12" width="56" height="136" rx="8" stroke="rgba(184,42,42,0.06)" strokeWidth="0.5" fill="none" />
+        <rect x="20" y="22" width="40" height="6" rx="3" fill="rgba(184,42,42,0.08)" />
+        <rect x="25" y="35" width="30" height="1.5" rx="0.75" fill="rgba(184,42,42,0.05)" />
+        <rect x="20" y="132" width="40" height="4" rx="2" fill="rgba(184,42,42,0.08)" />
+        <circle cx="40" cy="140" r="3" fill="rgba(184,42,42,0.12)" />
+        {/* Screen content hints */}
+        <path d="M25 55 L55 55" stroke="rgba(184,42,42,0.06)" strokeWidth="1" strokeDasharray="4 4" />
+        <path d="M25 75 L55 75" stroke="rgba(184,42,42,0.04)" strokeWidth="1" strokeDasharray="4 4" />
+        <path d="M25 95 L45 95" stroke="rgba(184,42,42,0.04)" strokeWidth="1" strokeDasharray="4 4" />
+        <path d="M25 115 L50 115" stroke="rgba(184,42,42,0.03)" strokeWidth="1" strokeDasharray="4 4" />
+      </svg>
+
+      {/* Phone 3 - Retro brick phone */}
+      <svg
+        className="deco-phone deco-phone--3"
+        viewBox="0 0 90 200"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="phone-glow-3" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path
+          d="M45 15 C70 15, 85 30, 85 55 L85 165 C85 190, 70 205, 45 205 C20 205, 5 190, 5 165 L5 55 C5 30, 20 15, 45 15 Z"
+          stroke="rgba(184,42,42,0.12)"
+          strokeWidth="1.5"
+          fill="rgba(8,8,8,0.4)"
+          filter="url(#phone-glow-3)"
+        />
+        <rect x="15" y="30" width="60" height="4" rx="2" fill="rgba(184,42,42,0.08)" />
+        <rect x="15" y="40" width="60" height="70" rx="2" stroke="rgba(184,42,42,0.06)" strokeWidth="0.5" fill="rgba(5,5,5,0.6)" />
+        <path d="M30 50 L60 50" stroke="rgba(184,42,42,0.05)" strokeWidth="0.8" strokeDasharray="3 3" />
+        <path d="M30 65 L60 65" stroke="rgba(184,42,42,0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+        <path d="M30 80 L60 80" stroke="rgba(184,42,42,0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+        <path d="M30 95 L60 95" stroke="rgba(184,42,42,0.03)" strokeWidth="0.8" strokeDasharray="3 3" />
+        <circle cx="45" cy="120" r="12" stroke="rgba(184,42,42,0.1)" strokeWidth="1" fill="rgba(8,8,8,0.5)" />
+        <circle cx="45" cy="120" r="6" fill="rgba(184,42,42,0.08)" />
+        <rect x="20" y="145" width="50" height="30" rx="3" stroke="rgba(184,42,42,0.08)" strokeWidth="0.5" fill="rgba(5,5,5,0.4)" />
+        <path d="M30 155 L60 155" stroke="rgba(184,42,42,0.04)" strokeWidth="0.8" strokeDasharray="3 3" />
+        <path d="M30 165 L60 165" stroke="rgba(184,42,42,0.03)" strokeWidth="0.8" strokeDasharray="3 3" />
+      </svg>
+
+      {/* Phone 4 - Minimal floating handset */}
+      <svg
+        className="deco-phone deco-phone--4"
+        viewBox="0 0 70 130"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <path
+          d="M35 5 C55 5, 65 15, 65 35 L65 115 C65 135, 55 145, 35 145 C15 145, 5 135, 5 115 L5 35 C5 15, 15 5, 35 5 Z"
+          stroke="rgba(184,42,42,0.08)"
+          strokeWidth="1"
+          fill="rgba(8,8,8,0.3)"
+        />
+        <ellipse cx="35" cy="75" rx="16" ry="10" stroke="rgba(184,42,42,0.06)" strokeWidth="0.5" fill="none" />
+        <path d="M25 65 L45 65" stroke="rgba(184,42,42,0.05)" strokeWidth="1" strokeLinecap="round" />
+        <path d="M25 75 L45 75" stroke="rgba(184,42,42,0.04)" strokeWidth="1" strokeLinecap="round" />
+        <path d="M25 85 L45 85" stroke="rgba(184,42,42,0.04)" strokeWidth="1" strokeLinecap="round" />
+      </svg>
+
+      {/* Phone 5 - Broken/cracked screen phone (narrative relevant) */}
+      <svg
+        className="deco-phone deco-phone--5"
+        viewBox="0 0 80 150"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <rect x="5" y="5" width="70" height="140" rx="10" stroke="rgba(184,42,42,0.1)" strokeWidth="1.5" fill="rgba(8,8,8,0.4)" />
+        <rect x="12" y="12" width="56" height="126" rx="6" stroke="rgba(184,42,42,0.05)" strokeWidth="0.5" fill="rgba(3,3,3,0.7)" />
+        {/* Crack lines */}
+        <path d="M40 30 L55 80" stroke="rgba(184,42,42,0.15)" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M40 30 L25 70" stroke="rgba(184,42,42,0.12)" strokeWidth="1" strokeLinecap="round" />
+        <path d="M55 80 L65 110" stroke="rgba(184,42,42,0.1)" strokeWidth="0.8" strokeLinecap="round" />
+        <path d="M25 70 L15 100" stroke="rgba(184,42,42,0.08)" strokeWidth="0.8" strokeLinecap="round" />
+        <path d="M40 30 L40 60" stroke="rgba(184,42,42,0.1)" strokeWidth="1" strokeLinecap="round" />
+        <circle cx="40" cy="120" r="4" fill="rgba(184,42,42,0.12)" />
+      </svg>
+
+      {/* Jenga block decorative element */}
+      <svg
+        className="deco-jenga deco-jenga--1"
+        viewBox="0 0 100 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <filter id="jenga-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect x="5" y="5" width="90" height="30" rx="3" stroke="rgba(184,42,42,0.12)" strokeWidth="1" fill="rgba(8,8,8,0.4)" filter="url(#jenga-glow)" />
+        <rect x="12" y="10" width="76" height="20" rx="1.5" stroke="rgba(184,42,42,0.06)" strokeWidth="0.5" fill="rgba(12,12,12,0.6)" />
+        <text x="50" y="26" text-anchor="middle" font-family="monospace" font-size="8" fill="rgba(184,42,42,0.15)" letter-spacing="0.3em">FORGIVENESS</text>
+        <line x1="25" y1="16" x2="75" y2="16" stroke="rgba(184,42,42,0.04)" strokeWidth="0.5" />
+        <line x1="25" y1="28" x2="75" y2="28" stroke="rgba(184,42,42,0.03)" strokeWidth="0.5" />
+      </svg>
+
+      {/* Floating particles / dust motes */}
+      <svg className="deco-particles" viewBox="0 0 400 400" aria-hidden="true">
+        <defs>
+          <radialGradient id="particle-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(184,42,42,0.3)" />
+            <stop offset="100%" stopColor="rgba(184,42,42,0)" />
+          </radialGradient>
+        </defs>
+        <circle cx="20" cy="30" r="1.5" fill="url(#particle-glow)" opacity="0.4" />
+        <circle cx="380" cy="60" r="1" fill="url(#particle-glow)" opacity="0.3" />
+        <circle cx="50" cy="350" r="1" fill="url(#particle-glow)" opacity="0.25" />
+        <circle cx="350" cy="370" r="1.5" fill="url(#particle-glow)" opacity="0.35" />
+        <circle cx="180" cy="20" r="0.8" fill="url(#particle-glow)" opacity="0.3" />
+        <circle cx="220" cy="380" r="1" fill="url(#particle-glow)" opacity="0.25" />
+        <circle cx="80" cy="180" r="0.7" fill="url(#particle-glow)" opacity="0.2" />
+        <circle cx="320" cy="200" r="1" fill="url(#particle-glow)" opacity="0.3" />
+      </svg>
+
+      {/* Red accent line / divider decorative */}
+      <svg className="deco-accent-line" viewBox="0 0 200 4" aria-hidden="true">
+        <defs>
+          <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(184,42,42,0)" />
+            <stop offset="50%" stopColor="rgba(184,42,42,0.4)" />
+            <stop offset="100%" stopColor="rgba(184,42,42,0)" />
+          </linearGradient>
+        </defs>
+        <rect width="200" height="2" fill="url(#accent-gradient)" />
+      </svg>
+    </>
+  )
+}
+
+// ============================================
 // COMPONENT: FilmGrain
 // ============================================
 function FilmGrain() {
@@ -696,6 +1020,7 @@ function Hero({ sectionRef }) {
       <div className="hero-section__bg slow-zoom">
         <div className="hero-section__overlay" />
         <DustParticles className="hero-section__dust" />
+        <DecorativePhoneFigures />
       </div>
       <div className="hero-section__content container">
         <div className="hero-section__tagline reveal">A PSYCHOLOGICAL THRILLER</div>
@@ -778,7 +1103,7 @@ He approaches the tower and places the final block, making the last move. The to
 
   return (
     <section id="story" ref={sectionRef} className="story-section section" aria-labelledby="story-title">
-      <div className="story-section__bg"><DustParticles /></div>
+      <div className="story-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
       <div className="container">
 
         {/* Section header */}
@@ -1135,7 +1460,7 @@ function Screenplay({ sectionRef }) {
 
   return (
     <section id="screenplay" ref={sectionRef} className="screenplay-section section" aria-labelledby="screenplay-title">
-      <div className="screenplay-section__bg"><DustParticles /></div>
+      <div className="screenplay-section__bg"><DustParticles /><DecorativePhoneFigures /></div>
       <div className="container">
 
         <div className={getClass('sp-header', 'cr', 'section-header')} ref={setRef('sp-header')}>
@@ -1206,6 +1531,7 @@ function Closing({ sectionRef }) {
       <div className="closing-section__bg">
         <div className="closing-section__vignette" />
         <DustParticles />
+        <DecorativePhoneFigures />
       </div>
       <div className="container">
         <div className="closing-section__content reveal">
