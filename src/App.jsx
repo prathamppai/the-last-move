@@ -621,6 +621,19 @@ He approaches the tower and places the final block, making the last move. The to
     }
   ]
 
+  // Refs for each animatable element
+  const elementRefs = useRef(new Map())
+  const visibilityMap = useScrollReveal(elementRefs, { rootMargin: '0px 0px -15% 0px' })
+
+  // Register ref callback
+  const setRef = useCallback((key) => (el) => {
+    if (el) {
+      elementRefs.current.set(key, el)
+    } else {
+      elementRefs.current.delete(key)
+    }
+  }, [])
+
   return (
     <section
       id="story"
