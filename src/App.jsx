@@ -646,21 +646,21 @@ He approaches the tower and places the final block, making the last move. The to
       </div>
 
       <div className="container">
-        <div className="section-header reveal">
+        <div className="section-header scroll-reveal" ref={setRef('story-header')}>
           <span className="section-header__label">THE NARRATIVE</span>
           <h2 id="story-title" className="section-header__title glitch" data-text="THE STORY">
             THE STORY
           </h2>
         </div>
 
-        <div className="story-section__meta reveal" style={{ transitionDelay: '100ms' }}>
+        <div className="story-section__meta scroll-reveal" ref={setRef('story-meta')}>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">GENRE</span>
             <span className="story-section__meta-value">Psychological Thriller / Mystery / Paranormal Drama</span>
           </div>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">THEMES</span>
-            <span className="story-section__meta-value">Friendship, Betrayal, Guilt &amp; Forgiveness</span>
+            <span className="story-section__meta-value">Friendship, Betrayal, Guilt & Forgiveness</span>
           </div>
           <div className="story-section__meta-item">
             <span className="story-section__meta-label">CENTRAL SYMBOL</span>
@@ -673,25 +673,31 @@ He approaches the tower and places the final block, making the last move. The to
         </div>
 
         <div className="story-section__acts">
-          {acts.map((act, index) => (
-            <article
-              key={act.number}
-              className="story-section__act reveal"
-              style={{ transitionDelay: `${index * 120}ms` }}
-            >
-              <div className="story-section__act-header">
-                <span className="story-section__act-number mono">{act.number}</span>
-                {act.title && (
-                  <h3 className="story-section__act-title">{act.title}</h3>
-                )}
-              </div>
-              <div className="story-section__act-body">
-                {act.body.split('\n\n').map((para, i) => (
-                  <p key={i} className="story-section__act-para serif">{para}</p>
-                ))}
-              </div>
-            </article>
-          ))}
+          {acts.map((act, index) => {
+            const actKey = `story-act-${act.number}`
+            const isVisible = visibilityMap[actKey]
+            const paragraphs = act.body.split('\n\n').filter(Boolean)
+
+            return (
+              <article
+                key={act.number}
+                ref={setRef(actKey)}
+                className={`story-section__act scroll-reveal-stagger ${isVisible ? 'is-visible' : ''}`}
+              >
+                <div className="story-section__act-header">
+                  <span className="story-section__act-number mono">{act.number}</span>
+                  {act.title && (
+                    <h3 className="story-section__act-title">{act.title}</h3>
+                  )}
+                </div>
+                <div className="story-section__act-body">
+                  {paragraphs.map((para, i) => (
+                    <p key={i} className="story-section__act-para serif">{para}</p>
+                  ))}
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -702,6 +708,19 @@ He approaches the tower and places the final block, making the last move. The to
 // COMPONENT: Screenplay - Full scene breakdown from PDF pages 3-7
 // ============================================
 function Screenplay({ sectionRef }) {
+  // Refs for each animatable element
+  const elementRefs = useRef(new Map())
+  const visibilityMap = useScrollReveal(elementRefs, { rootMargin: '0px 0px -15% 0px' })
+
+  // Register ref callback
+  const setRef = useCallback((key) => (el) => {
+    if (el) {
+      elementRefs.current.set(key, el)
+    } else {
+      elementRefs.current.delete(key)
+    }
+  }, [])
+
   const scenes = [
     {
       id: 'S1',
@@ -994,7 +1013,7 @@ function Screenplay({ sectionRef }) {
       </div>
 
       <div className="container">
-        <div className="section-header reveal">
+        <div className="section-header scroll-reveal" ref={setRef('screenplay-header')}>
           <span className="section-header__label">THE SCRIPT</span>
           <h2 id="screenplay-title" className="section-header__title glitch" data-text="SCREENPLAY">
             SCREENPLAY
@@ -1002,39 +1021,53 @@ function Screenplay({ sectionRef }) {
         </div>
 
         <div className="screenplay-section__script">
-          {scenes.map((scene, index) => (
-            <article
-              key={scene.id}
-              className="screenplay-scene reveal"
-              style={{ transitionDelay: `${Math.min(index * 80, 500)}ms` }}
-            >
-              <header className="screenplay-scene__header">
-                <span className="screenplay-scene__number mono">{scene.number}</span>
-                {scene.title && (
-                  <h3 className="screenplay-scene__title">{scene.title}</h3>
-                )}
-              </header>
+          {scenes.map((scene, index) => {
+            const sceneKey = `screenplay-scene-${scene.id}`
+            const isVisible = visibilityMap[sceneKey]
 
-              <div className="screenplay-scene__body">
-                {scene.lines.map((line, i) => (
-                  <div key={i} className={`screenplay-line screenplay-line--${line.type}`}>
-                    {line.text}
-                  </div>
-                ))}
+            return (
+              <article
+                key={scene.id}
+                ref={setRef(sceneKey)}
+                className={`screenplay-scene scroll-reveal-stagger ${isVisible ? 'is-visible' : ''}`}
+              >
+                <header className="screenplay-scene__header">
+                  <span className="screenplay-scene__number mono">{scene.number}</span>
+                  {scene.title && (
+                    <h3 className="screenplay-scene__title">{scene.title}</h3>
+                  )}
+                </header>
 
-                {scene.subscenes && scene.subscenes.map((sub) => (
-                  <div key={sub.id} className="screenplay-subscene">
-                    <div className="screenplay-subscene__number mono">{sub.number}</div>
-                    {sub.lines.map((line, i) => (
-                      <div key={i} className={`screenplay-line screenplay-line--${line.type}`}>
-                        {line.text}
+                <div className="screenplay-scene__body">
+                  {scene.lines.map((line, i) => (
+                    <div key={i} className={`screenplay-line screenplay-line--${line.type}`}>
+                      {line.text}
+                    </div>
+                  ))}
+
+                  {scene.subscenes && scene.subscenes.map((sub) => {
+                    const subKey = `screenplay-sub-${sub.id}`
+                    const subVisible = visibilityMap[subKey]
+
+                    return (
+                      <div
+                        key={sub.id}
+                        ref={setRef(subKey)}
+                        className={`screenplay-subscene scroll-reveal-stagger ${subVisible ? 'is-visible' : ''}`}
+                      >
+                        <div className="screenplay-subscene__number mono">{sub.number}</div>
+                        {sub.lines.map((line, i) => (
+                          <div key={i} className={`screenplay-line screenplay-line--${line.type}`}>
+                            {line.text}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                    )
+                  })}
+                </div>
+              </article>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -1148,6 +1181,7 @@ function App() {
 
   return (
     <>
+      <ScrollAnimationStyles />
       <FilmGrain />
       <Vignette />
       <BackgroundMusic />
